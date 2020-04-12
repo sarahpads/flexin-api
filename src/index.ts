@@ -3,12 +3,38 @@ import { createConnection } from "typeorm";
 import { ApolloServer } from "apollo-server";
 import { buildSchema } from "type-graphql";
 
-import { UserResolver } from "./resolvers/UserResolver";
+import { User, UserResolver } from "./models/User";
+import { Challenge, ChallengeResolver } from "./models/Challenge";
+import { ChallengeResponse, ChallengeResponseResolver } from "./models/ChallengeResponse";
+import { Exercise, ExerciseResolver } from "./models/Exercise";
+import { UserExercise, UserExerciseResolver } from "./models/UserExercise";
 
 async function main() {
-  const connection = await createConnection()
+  const connection = await createConnection({
+    type: "postgres",
+    host: "localhost",
+    port: 6543,
+    database: "flexin",
+    username: "postgres",
+    entities: [
+      Challenge,
+      ChallengeResponse,
+      Exercise,
+      User,
+      UserExercise
+    ],
+    synchronize: true,
+    logging: true
+  })
+
   const schema = await buildSchema({
-    resolvers: [UserResolver]
+    resolvers: [
+      ChallengeResolver,
+      ChallengeResponseResolver,
+      ExerciseResolver,
+      UserResolver,
+      UserExerciseResolver
+    ]
   })
 
   const server = new ApolloServer({ schema })
