@@ -1,10 +1,19 @@
-import { Resolver, Query, Mutation, Arg } from "type-graphql";
+import { Resolver, Query, Mutation, Arg, Subscription } from "type-graphql";
 
 import { ChallengeResponse } from "./ChallengeResponse";
 import { CreateResponseInput } from "./CreateResponseInput";
 
 @Resolver()
 export class ChallengeResponseResolver {
+  /*@Subscription({
+    topics: ({ payload, args } => {
+      // return challenge id as topic
+    })
+  })
+  newResponse(): ChallengeResponse {
+
+  }*/
+
   @Query(() => [ChallengeResponse])
   challengeResponses() {
     return ChallengeResponse.find();

@@ -42,6 +42,10 @@ async function main() {
 
   const server = new ApolloServer({
     schema,
+    subscriptions: {
+      path: "/subscriptions",
+      onConnect
+    },
     context: async ({ req }) => {
       const auth = req.headers.authorization;
 
@@ -62,10 +66,15 @@ async function main() {
         uid: user.sub
       }
     }
-  })
+  });
+
   await server.listen(4000)
 
   console.log("Server has started!")
+}
+
+function onConnect(params: any) {
+  console.log('connect', params)
 }
 
 main();

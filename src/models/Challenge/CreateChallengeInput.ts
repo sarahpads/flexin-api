@@ -1,13 +1,13 @@
 import { InputType, Field } from "type-graphql";
 
 @InputType()
-export class CreateUserExerciseInput {
+export class CreateChallengeInput {
+  @Field()
+  user: string;
+
   @Field()
   exercise: string;
 
   @Field()
-  reps: number;
-
-  @Field()
-  user: string;
+  reps: number
 }

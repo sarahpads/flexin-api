@@ -45,12 +45,12 @@ export class UserExerciseResolver {
 
   @Mutation(() => UserExercise)
   async createUserExercise(@Arg("data") data: CreateUserExerciseInput) {
-    // TODO: use context to stamp user
     const exerciseRepository = getRepository(Exercise)
     const exercise = await exerciseRepository.findOne({ where: { id: data.exercise } });
 
     const userRepository = getRepository(User);
-    const user = await userRepository.findOne({ where: { id: "1" } });
+    // TODO: ensure randos can't create for other users?
+    const user = await userRepository.findOne({ where: { id: data.user } });
 
     const userExercise = UserExercise.create({
       reps: data.reps,
