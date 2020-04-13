@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Arg } from "type-graphql";
+import { Resolver, Query, Mutation, Arg, Authorized } from "type-graphql";
 
 import { User } from "./User";
 import { CreateUserInput } from "./CreateUserInput";
@@ -6,6 +6,7 @@ import { UpdateUserInput } from "./UpdateUserInput";
 
 @Resolver()
 export class UserResolver {
+  @Authorized()
   @Query(() => [User])
   users() {
     return User.find();
