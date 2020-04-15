@@ -28,9 +28,7 @@ export class UserExerciseResolver {
   }
 
   @FieldResolver(returns => Exercise)
-  // TODO: based on user context
-  async exercise(@Root() { id }: UserExercise, @Ctx() context: any) {
-    console.log(context)
+  async exercise(@Root() { id }: UserExercise) {
     const userExercise = await UserExercise.createQueryBuilder("userExercise")
       .where("userExercise.id = :id", { id })
       .leftJoinAndSelect("userExercise.exercise", "exercise")

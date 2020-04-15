@@ -13,9 +13,11 @@ export class Challenge extends BaseEntity {
   id: string;
 
   @Field(() => Number)
+  @Column()
   reps: number
 
   @Field(() => Date)
+  @Column()
   date: Date
 
   @OneToMany(

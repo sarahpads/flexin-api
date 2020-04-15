@@ -1,18 +1,25 @@
-import { Resolver, Query, Mutation, Arg, Subscription } from "type-graphql";
+import { Resolver, Query, Mutation, Arg, Subscription, FieldResolver, Root, PubSub, PubSubEngine } from "type-graphql";
 
 import { ChallengeResponse } from "./ChallengeResponse";
 import { CreateResponseInput } from "./CreateResponseInput";
+import { User } from "../User";
+import { Challenge } from "../Challenge/Challenge";
+import { getRepository } from "typeorm";
 
-@Resolver()
+@Resolver(of => ChallengeResponse)
 export class ChallengeResponseResolver {
-  /*@Subscription({
-    topics: ({ payload, args } => {
+  @Subscription({
+    topics: (({ payload, args }) => {
+      console.log(payload)
+      console.log(args)
       // return challenge id as topic
+      return "NEW_RESPONSE";
     })
   })
-  newResponse(): ChallengeResponse {
-
-  }*/
+  newResponse(@Arg("challengeId") challengeId: string, @Root() response: ChallengeResponse): ChallengeResponse {
+    console.log(challengeId)
+    return response;
+  }
 
   @Query(() => [ChallengeResponse])
   challengeResponses() {
@@ -30,10 +37,52 @@ export class ChallengeResponseResolver {
     return challengeResponse;
   }
 
+  @FieldResolver(() => User)
+  async user(@Root() { id }: ChallengeResponse) {
+    const response = await ChallengeResponse.createQueryBuilder("challengeResponse")
+      .where("challengeResponse.id = :id", { id })
+      .leftJoinAndSelect("challengeResponse.user", "user")
+      .getOne();
+
+    if (!response) {
+      throw new Error("ChallengeResponse not found");
+    }
+
+    return response.user;
+  }
+
+  @FieldResolver(() => Challenge)
+  async challenge(@Root() { id }: ChallengeResponse) {
+    const response = await ChallengeResponse.createQueryBuilder("challengeResponse")
+      .where("challengeResponse.id = :id", { id })
+      .leftJoinAndSelect("challengeResponse.challenge", "challenge")
+      .getOne();
+
+    if (!response) {
+      throw new Error("ChallengeResponse not found");
+    }
+
+    return response.challenge;
+  }
+
   @Mutation(() => ChallengeResponse)
-  async createResponse(@Arg("data") data: CreateResponseInput) {
-    const response = ChallengeResponse.create(data);
+  async createResponse(@Arg("data") data: CreateResponseInput, @PubSub() pubsub: PubSubEngine) {
+    const challengeRepository = getRepository(Challenge);
+    const challenge = await challengeRepository.findOne({ where: { id: data.challenge }});
+
+    const userRepository = getRepository(User);
+    // TODO: ensure randos can't create for other users?
+    const user = await userRepository.findOne({ where: { id: data.user } });
+
+    const response = ChallengeResponse.create({
+      reps: data.reps,
+      challenge,
+      user
+    });
+
     await response.save();
+
+    pubsub.publish("NEW_RESPONSE", response);
 
     return response;
   }

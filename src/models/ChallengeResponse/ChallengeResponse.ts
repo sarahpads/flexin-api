@@ -15,6 +15,10 @@ export class ChallengeResponse extends BaseEntity {
   @Column()
   reps: number;
 
+  /*@Field(() => Date)
+  @Column()
+  date: Date;*/
+
   @ManyToOne(
     type => Challenge,
     challenge => challenge.responses

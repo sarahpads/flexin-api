@@ -46,7 +46,11 @@ async function main() {
       path: "/subscriptions",
       onConnect
     },
-    context: async ({ req }) => {
+    context: async ({ req, connection }) => {
+      if (connection) {
+        return;
+      }
+
       const auth = req.headers.authorization;
 
       if (!auth) {
@@ -57,11 +61,12 @@ async function main() {
       const user: any = jwtDecode(token);
 
       // Make sure token isn't expired
-      if (Date.now() <= user.exp) {
+      if (Date.now() >= user.exp * 1000) {
         return;
       }
 
       // If not, add user.sub as uid
+      // https://developers.google.com/identity/protocols/oauth2/openid-connect#an-id-tokens-payload
       return {
         uid: user.sub
       }
