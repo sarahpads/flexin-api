@@ -1,4 +1,4 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, PrimaryColumn } from "typeorm";
 import { ObjectType, Field, ID } from "type-graphql";
 
 import { Challenge } from "../Challenge/Challenge";
@@ -7,9 +7,11 @@ import { User } from "../User";
 @Entity()
 @ObjectType()
 export class ChallengeResponse extends BaseEntity {
-  @Field(() => ID)
-  @PrimaryGeneratedColumn()
-  id: string;
+  @PrimaryColumn()
+  challengeId: string;
+
+  @PrimaryColumn()
+  userId: string;
 
   @Field(() => Number)
   @Column()
@@ -21,13 +23,23 @@ export class ChallengeResponse extends BaseEntity {
 
   @ManyToOne(
     type => Challenge,
-    challenge => challenge.responses
+    challenge => challenge.responses,
+    {
+      primary: true,
+      nullable: false
+    }
   )
+  @JoinColumn()
   challenge: Challenge
 
   @ManyToOne(
     type => User,
-    user => user.challengeResponses
+    user => user.challengeResponses,
+    {
+      primary: true,
+      nullable: false
+    }
   )
+  @JoinColumn()
   user: User
 }

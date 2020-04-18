@@ -24,6 +24,20 @@ export class UserResolver {
     return user;
   }
 
+  // TODO: create profile that takes user and userExercises
+/*const photo1 = new Photo();
+photo1.url = "me.jpg";
+await connection.manager.save(photo1);
+
+const photo2 = new Photo();
+photo2.url = "me-and-bears.jpg";
+await connection.manager.save(photo2);
+
+const user = new User();
+user.name = "John";
+user.photos = [photo1, photo2];*/
+// With cascades enabled you can save this relation with only one save call.
+
   @Mutation(() => User)
   async createUser(@Arg("data") data: CreateUserInput) {
     const user = User.create(data);

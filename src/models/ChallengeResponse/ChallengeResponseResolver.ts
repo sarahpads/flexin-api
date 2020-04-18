@@ -38,31 +38,23 @@ export class ChallengeResponseResolver {
   }
 
   @FieldResolver(() => User)
-  async user(@Root() { id }: ChallengeResponse) {
-    const response = await ChallengeResponse.createQueryBuilder("challengeResponse")
-      .where("challengeResponse.id = :id", { id })
-      .leftJoinAndSelect("challengeResponse.user", "user")
-      .getOne();
+  async user(@Root() challengeResponse: ChallengeResponse) {
+    const user = await ChallengeResponse.createQueryBuilder()
+      .relation(ChallengeResponse, "user")
+      .of(challengeResponse)
+      .loadOne();
 
-    if (!response) {
-      throw new Error("ChallengeResponse not found");
-    }
-
-    return response.user;
+    return user;
   }
 
   @FieldResolver(() => Challenge)
-  async challenge(@Root() { id }: ChallengeResponse) {
-    const response = await ChallengeResponse.createQueryBuilder("challengeResponse")
-      .where("challengeResponse.id = :id", { id })
-      .leftJoinAndSelect("challengeResponse.challenge", "challenge")
-      .getOne();
+  async challenge(@Root() challengeResponse: ChallengeResponse) {
+    const challenge = await ChallengeResponse.createQueryBuilder()
+      .relation(ChallengeResponse, "challenge")
+      .of(challengeResponse)
+      .loadOne()
 
-    if (!response) {
-      throw new Error("ChallengeResponse not found");
-    }
-
-    return response.challenge;
+    return challenge;
   }
 
   @Mutation(() => ChallengeResponse)

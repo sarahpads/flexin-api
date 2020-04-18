@@ -7,7 +7,7 @@ import { User } from "../User/User";
 
 @Resolver(of => UserExercise)
 export class UserExerciseResolver {
-  constructor() {}
+  constructor() { }
 
   @Query(() => [UserExercise])
   userExercises() {
@@ -26,32 +26,24 @@ export class UserExerciseResolver {
   }
 
   @FieldResolver(() => User)
-  async user(@Root() { id }: UserExercise) {
-    const response = await UserExercise.createQueryBuilder("userExercise")
-      .where("userExercise.id = :id", { id })
-      .leftJoinAndSelect("userExercise.user", "user")
-      .getOne();
+  async user(@Root() userExercise: UserExercise) {
+    const user = await UserExercise.createQueryBuilder()
+      .relation(UserExercise, "user")
+      .of(userExercise)
+      .loadOne()
 
-    if (!response) {
-      throw new Error("UserExercise not found");
-    }
-
-    return response.user;
+    return user;
   }
 
 
   @FieldResolver(returns => Exercise)
-  async exercise(@Root() { id }: UserExercise) {
-    const userExercise = await UserExercise.createQueryBuilder("userExercise")
-      .where("userExercise.id = :id", { id })
-      .leftJoinAndSelect("userExercise.exercise", "exercise")
-      .getOne()
+  async exercise(@Root() userExercise: UserExercise) {
+    const exercise = await UserExercise.createQueryBuilder()
+      .relation(UserExercise, "exercise")
+      .of(userExercise)
+      .loadOne()
 
-    if (!userExercise) {
-      throw new Error("UserExercise not found");
-    }
-
-    return userExercise.exercise;
+    return exercise;
   }
 
   @Mutation(() => UserExercise)

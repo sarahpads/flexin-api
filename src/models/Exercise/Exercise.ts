@@ -1,4 +1,4 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn } from "typeorm";
 import { ObjectType, Field, ID } from "type-graphql";
 
 import { Challenge } from "../Challenge";
@@ -24,11 +24,13 @@ export class Exercise extends BaseEntity {
     type => Challenge,
     challenge => challenge.exercise
   )
+  @JoinColumn()
   challenges: Challenge[]
 
   @OneToMany(
     type => UserExercise,
     userExercise => userExercise.exercise
   )
+  @JoinColumn()
   userExercises: UserExercise[]
 }
