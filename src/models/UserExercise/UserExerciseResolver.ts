@@ -7,9 +7,7 @@ import { User } from "../User/User";
 
 @Resolver(of => UserExercise)
 export class UserExerciseResolver {
-  constructor(
-    private exerciseRepository: Repository<User>
-  ) {}
+  constructor() {}
 
   @Query(() => [UserExercise])
   userExercises() {
@@ -17,7 +15,7 @@ export class UserExerciseResolver {
   }
 
   @Query(() => UserExercise)
-  async user(@Arg("id") id: string) {
+  async userExercise(@Arg("id") id: string) {
     const userExercise = await UserExercise.findOne({ where: { id } });
 
     if (!userExercise) {
@@ -26,6 +24,21 @@ export class UserExerciseResolver {
 
     return userExercise;
   }
+
+  @FieldResolver(() => User)
+  async user(@Root() { id }: UserExercise) {
+    const response = await UserExercise.createQueryBuilder("userExercise")
+      .where("userExercise.id = :id", { id })
+      .leftJoinAndSelect("userExercise.user", "user")
+      .getOne();
+
+    if (!response) {
+      throw new Error("UserExercise not found");
+    }
+
+    return response.user;
+  }
+
 
   @FieldResolver(returns => Exercise)
   async exercise(@Root() { id }: UserExercise) {
@@ -49,6 +62,7 @@ export class UserExerciseResolver {
     const userRepository = getRepository(User);
     // TODO: ensure randos can't create for other users?
     const user = await userRepository.findOne({ where: { id: data.user } });
+    console.log(user)
 
     const userExercise = UserExercise.create({
       reps: data.reps,

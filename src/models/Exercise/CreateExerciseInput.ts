@@ -8,5 +8,5 @@ export class CreateExerciseInput {
   title: string;
 
   @Field(type => MuscleGroup)
-  muscelGroup: MuscleGroup
+  muscleGroup: MuscleGroup
 }

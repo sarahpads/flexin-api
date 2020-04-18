@@ -42,6 +42,12 @@ async function main() {
 
   const server = new ApolloServer({
     schema,
+    formatError: (error) => {
+      // TODO: format this for obvious 404s, etc
+      // https://javascript.info/custom-errors
+      console.log(error)
+      return error;
+    },
     subscriptions: {
       path: "/subscriptions",
       onConnect

@@ -1,4 +1,4 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, OneToMany, PrimaryColumn } from "typeorm";
 import { ObjectType, Field, ID } from "type-graphql";
 
 import { Challenge } from "../Challenge";
@@ -9,7 +9,7 @@ import { UserExercise } from "../UserExercise";
 @ObjectType()
 export class User extends BaseEntity {
   @Field(() => ID)
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   id: string;
 
   @Field(() => String)
@@ -37,6 +37,4 @@ export class User extends BaseEntity {
     userExercise => userExercise.user
   )
   exercises: UserExercise[]
-
-  // TODO: has-many user-baseline
 }

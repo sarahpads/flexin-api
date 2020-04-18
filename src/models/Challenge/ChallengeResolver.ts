@@ -5,6 +5,7 @@ import { CreateChallengeInput } from "./CreateChallengeInput";
 import { getRepository } from "typeorm";
 import { Exercise } from "../Exercise";
 import { User } from "../User";
+import { ChallengeResponse } from "../ChallengeResponse";
 
 @Resolver(of => Challenge)
 export class ChallengeResolver {
@@ -57,6 +58,20 @@ export class ChallengeResolver {
     }
 
     return challenge.exercise;
+  }
+
+  @FieldResolver(() => [ChallengeResponse])
+  async responses(@Root() { id }: Challenge ) {
+    const challenge = await Challenge.createQueryBuilder("challenge")
+      .where("challenge.id = :id", { id })
+      .leftJoinAndSelect("challenge.responses", "responses")
+      .getOne()
+
+    if (!challenge) {
+      throw new Error("Challenge not found")
+    }
+
+    return challenge.responses;
   }
 
   @Mutation(() => Challenge)

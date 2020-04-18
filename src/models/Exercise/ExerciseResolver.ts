@@ -23,6 +23,7 @@ export class ExerciseResolver {
 
   @Mutation(() => Exercise)
   async createExercise(@Arg("data") data: CreateExerciseInput) {
+    console.log(data)
     const exercise = Exercise.create(data);
     await exercise.save();
 

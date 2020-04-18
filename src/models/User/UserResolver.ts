@@ -3,10 +3,11 @@ import { Resolver, Query, Mutation, Arg, Authorized } from "type-graphql";
 import { User } from "./User";
 import { CreateUserInput } from "./CreateUserInput";
 import { UpdateUserInput } from "./UpdateUserInput";
+import NotFoundError from "../../errors/NotFoundError";
 
 @Resolver()
 export class UserResolver {
-  @Authorized()
+  // @Authorized()
   @Query(() => [User])
   users() {
     return User.find();
@@ -17,7 +18,7 @@ export class UserResolver {
     const user = await User.findOne({ where: { id } });
 
     if (!user) {
-      throw new Error("User not found");
+      throw new NotFoundError(`User ${id} not found`);
     }
 
     return user;
