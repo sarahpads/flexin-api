@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Arg, Authorized, Subscription, Root, PubSub, PubSubEngine, FieldResolver } from "type-graphql";
+import { Resolver, Query, Mutation, Arg, Authorized, Subscription, Root, PubSub, PubSubEngine, FieldResolver, UseMiddleware } from "type-graphql";
 
 import { Challenge } from "./Challenge";
 import { CreateChallengeInput } from "./CreateChallengeInput";
@@ -6,6 +6,8 @@ import { getRepository } from "typeorm";
 import { Exercise } from "../Exercise";
 import { User } from "../User";
 import { ChallengeResponse } from "../ChallengeResponse";
+import { ROLES } from "../../auth-checker";
+import { CreateChallengeValidator } from "./CreateChallengeValidator";
 
 @Resolver(of => Challenge)
 export class ChallengeResolver {
@@ -77,7 +79,7 @@ export class ChallengeResolver {
   }
 
   @FieldResolver(() => [ChallengeResponse])
-  async responses(@Root() challenge: Challenge ) {
+  async responses(@Root() challenge: Challenge) {
     const responses = await Challenge.createQueryBuilder("challenge")
       .relation(Challenge, "responses")
       .of(challenge)
@@ -86,14 +88,14 @@ export class ChallengeResolver {
     return responses;
   }
 
-  // TODO: can only create challenge if there isn't an active one
+  @Authorized([ROLES.SAME_USER])
+  @UseMiddleware(CreateChallengeValidator)
   @Mutation(() => Challenge)
   async createChallenge(@Arg("data") data: CreateChallengeInput, @PubSub() pubsub: PubSubEngine) {
     const exerciseRepository = getRepository(Exercise)
     const exercise = await exerciseRepository.findOne({ where: { id: data.exercise } });
 
     const userRepository = getRepository(User);
-    // TODO: ensure randos can't create for other users?
     const user = await userRepository.findOne({ where: { id: data.user } });
 
     const date = new Date();

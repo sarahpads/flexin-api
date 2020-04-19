@@ -1,10 +1,12 @@
-import { Resolver, Query, Mutation, Arg, Subscription, FieldResolver, Root, PubSub, PubSubEngine } from "type-graphql";
+import { Resolver, Query, Mutation, Arg, Subscription, FieldResolver, Root, PubSub, PubSubEngine, Authorized, UseMiddleware } from "type-graphql";
 
 import { ChallengeResponse } from "./ChallengeResponse";
 import { CreateResponseInput } from "./CreateResponseInput";
 import { User } from "../User";
 import { Challenge } from "../Challenge/Challenge";
 import { getRepository } from "typeorm";
+import { ROLES } from "../../auth-checker";
+import { CreateResponseValidator } from "./CreateResponseValidator";
 
 @Resolver(of => ChallengeResponse)
 export class ChallengeResponseResolver {
@@ -12,7 +14,6 @@ export class ChallengeResponseResolver {
     topics: "NEW_RESPONSE"
   })
   newResponse(@Arg("challengeId") challengeId: string, @Root() response: ChallengeResponse): ChallengeResponse {
-    console.log(challengeId)
     return response;
   }
 
@@ -52,14 +53,14 @@ export class ChallengeResponseResolver {
     return challenge;
   }
 
-  // TODO: make sure they can't create one for an expired challenge
+  @Authorized([ROLES.SAME_USER])
+  @UseMiddleware(CreateResponseValidator)
   @Mutation(() => ChallengeResponse)
   async createResponse(@Arg("data") data: CreateResponseInput, @PubSub() pubsub: PubSubEngine) {
     const challengeRepository = getRepository(Challenge);
     const challenge = await challengeRepository.findOne({ where: { id: data.challenge }});
 
     const userRepository = getRepository(User);
-    // TODO: ensure randos can't create for other users?
     const user = await userRepository.findOne({ where: { id: data.user } });
 
     const response = await ChallengeResponse.insert({

@@ -1,6 +1,14 @@
 import { AuthChecker } from "type-graphql";
+import { getConnection } from "typeorm";
+import { User } from "./models/User";
+import { Role } from "./models/Role.enum";
 
-export const customAuthChecker: AuthChecker<{ uid: string}> = (
+export enum ROLES {
+  ADMIN = "ADMIN",
+  SAME_USER = "SAME_USER"
+}
+
+export const customAuthChecker: AuthChecker<{ uid: string}> = async (
   { root, args, context, info },
   roles
 ) => {
@@ -8,14 +16,21 @@ export const customAuthChecker: AuthChecker<{ uid: string}> = (
     return !!context.uid;
   }
 
-  // here we can read the user from context
-  // and check his permission in the db against the `roles` argument
-  // that comes from the `@Authorized` decorator, eg. ["ADMIN", "MODERATOR"]
-  console.log('root', root)
-  console.log('args', args)
-  console.log('context', context)
-  console.log('info', info)
-  console.log('roles', roles)
+  const user = await getConnection().getRepository(User).findOne({ id: context.uid })
+  const hasAccess = roles.some((role) => determineAccess(user, role, context, args));
 
-  return true; // or false if access is denied
+  return hasAccess;
 };
+
+function determineAccess(user: User | undefined, role: string, context: any, args: any) {
+  switch(role) {
+    case ROLES.SAME_USER:
+      return context.uid === args.data.user;
+
+    case ROLES.ADMIN:
+      return user && user.role === Role.ADMIN;
+
+    default:
+      return false;
+  }
+}

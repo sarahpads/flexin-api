@@ -1,9 +1,10 @@
-import { Resolver, Query, Mutation, Arg, FieldResolver, Root, Ctx } from "type-graphql";
+import { Resolver, Query, Mutation, Arg, FieldResolver, Root, Ctx, Authorized } from "type-graphql";
 import { UserExercise } from "./UserExercise";
 import { CreateUserExerciseInput } from "./CreateUserExerciseInput";
-import { getRepository, Repository, createQueryBuilder } from "typeorm";
+import { getRepository } from "typeorm";
 import { Exercise } from "../Exercise";
 import { User } from "../User/User";
+import { ROLES } from "../../auth-checker";
 
 @Resolver(of => UserExercise)
 export class UserExerciseResolver {
@@ -46,15 +47,14 @@ export class UserExerciseResolver {
     return exercise;
   }
 
+  @Authorized([ROLES.SAME_USER])
   @Mutation(() => UserExercise)
   async createUserExercise(@Arg("data") data: CreateUserExerciseInput) {
     const exerciseRepository = getRepository(Exercise)
     const exercise = await exerciseRepository.findOne({ where: { id: data.exercise } });
 
     const userRepository = getRepository(User);
-    // TODO: ensure randos can't create for other users?
     const user = await userRepository.findOne({ where: { id: data.user } });
-    console.log(user)
 
     const userExercise = await UserExercise.insert({
       reps: data.reps,

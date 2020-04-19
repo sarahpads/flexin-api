@@ -1,9 +1,11 @@
 import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, OneToMany, PrimaryColumn, JoinTable, JoinColumn } from "typeorm";
-import { ObjectType, Field, ID } from "type-graphql";
+import { ObjectType, Field, ID, Authorized } from "type-graphql";
 
 import { Challenge } from "../Challenge";
 import { ChallengeResponse } from "../ChallengeResponse";
 import { UserExercise } from "../UserExercise";
+import { Role } from "../Role.enum";
+import { ROLES } from "../../auth-checker";
 
 @Entity()
 @ObjectType()
@@ -19,6 +21,11 @@ export class User extends BaseEntity {
   @Field(() => String)
   @Column()
   name: string;
+
+  @Authorized([ROLES.ADMIN])
+  @Field(() => Role)
+  @Column({ nullable: true })
+  role: Role;
 
   @OneToMany(
     type => Challenge,

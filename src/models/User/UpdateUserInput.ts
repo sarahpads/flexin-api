@@ -1,10 +1,11 @@
 import { InputType, Field } from "type-graphql";
+import { Role } from "../Role.enum";
 
 @InputType()
 export class UpdateUserInput {
-  @Field({ nullable: false })
+  @Field({ nullable: true })
   email?: string;
 
-  @Field({ nullable: false })
+  @Field({ nullable: true })
   name?: string;
 }
