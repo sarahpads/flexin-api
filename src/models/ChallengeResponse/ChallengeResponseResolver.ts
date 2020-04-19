@@ -9,12 +9,7 @@ import { getRepository } from "typeorm";
 @Resolver(of => ChallengeResponse)
 export class ChallengeResponseResolver {
   @Subscription({
-    topics: (({ payload, args }) => {
-      console.log(payload)
-      console.log(args)
-      // return challenge id as topic
-      return "NEW_RESPONSE";
-    })
+    topics: "NEW_RESPONSE"
   })
   newResponse(@Arg("challengeId") challengeId: string, @Root() response: ChallengeResponse): ChallengeResponse {
     console.log(challengeId)
@@ -57,6 +52,7 @@ export class ChallengeResponseResolver {
     return challenge;
   }
 
+  // TODO: make sure they can't create one for an expired challenge
   @Mutation(() => ChallengeResponse)
   async createResponse(@Arg("data") data: CreateResponseInput, @PubSub() pubsub: PubSubEngine) {
     const challengeRepository = getRepository(Challenge);
@@ -66,13 +62,13 @@ export class ChallengeResponseResolver {
     // TODO: ensure randos can't create for other users?
     const user = await userRepository.findOne({ where: { id: data.user } });
 
-    const response = ChallengeResponse.create({
+    const response = await ChallengeResponse.insert({
       reps: data.reps,
       challenge,
-      user
+      user,
+      date: new Date().toISOString()
     });
 
-    await response.save();
 
     pubsub.publish("NEW_RESPONSE", response);
 

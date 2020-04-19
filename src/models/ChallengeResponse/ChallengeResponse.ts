@@ -17,9 +17,9 @@ export class ChallengeResponse extends BaseEntity {
   @Column()
   reps: number;
 
-  /*@Field(() => Date)
+  @Field(() => Date)
   @Column()
-  date: Date;*/
+  date: Date;
 
   @ManyToOne(
     type => Challenge,

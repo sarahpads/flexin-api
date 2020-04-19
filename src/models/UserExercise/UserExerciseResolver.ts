@@ -56,13 +56,11 @@ export class UserExerciseResolver {
     const user = await userRepository.findOne({ where: { id: data.user } });
     console.log(user)
 
-    const userExercise = UserExercise.create({
+    const userExercise = await UserExercise.insert({
       reps: data.reps,
       exercise,
       user
     });
-
-    await userExercise.save();
 
     return userExercise;
   }

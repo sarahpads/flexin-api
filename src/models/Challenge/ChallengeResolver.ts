@@ -22,6 +22,30 @@ export class ChallengeResolver {
   }
 
   @Query(() => Challenge)
+  async activeChallenge() {
+    const now = new Date();
+    const challenge = await Challenge.createQueryBuilder("challenge")
+      .where("challenge.expiresAt > :now", { now })
+      .getOne();
+
+    if (!challenge) {
+      throw new Error("Challenge not found");
+    }
+
+    return challenge;
+  }
+
+  @Query(() => [ChallengeResponse])
+  async challengeResponses(@Arg("challengeId") id: string) {
+    const responses = await Challenge.createQueryBuilder("challenge")
+      .relation(Challenge, "responses")
+      .of({ id })
+      .loadMany();
+
+    return responses;
+  }
+
+  @Query(() => Challenge)
   async challenge(@Arg("id") id: string) {
     const challenge = await Challenge.findOne({ where: { id } });
 
@@ -33,47 +57,36 @@ export class ChallengeResolver {
   }
 
   @FieldResolver(() => User)
-  async user(@Root() { id }: Challenge) {
-    const challenge = await Challenge.createQueryBuilder("challenge")
-      .where("challenge.id = :id", { id })
-      .leftJoinAndSelect("challenge.user", "user")
-      .getOne();
+  async user(@Root() challenge: Challenge) {
+    const user = await Challenge.createQueryBuilder("challenge")
+      .relation(Challenge, "user")
+      .of(challenge)
+      .loadOne();
 
-    if (!challenge) {
-      throw new Error("Challenge not found");
-    }
-
-    return challenge.user;
+    return user;
   }
 
   @FieldResolver(() => Exercise)
-  async exercise(@Root() { id }: Challenge) {
-    const challenge = await Challenge.createQueryBuilder("challenge")
-      .where("challenge.id = :id", { id })
-      .leftJoinAndSelect("challenge.exercise", "exercise")
-      .getOne()
+  async exercise(@Root() challenge: Challenge) {
+    const exercise = await Challenge.createQueryBuilder("challenge")
+      .relation(Challenge, "exercise")
+      .of(challenge)
+      .loadOne();
 
-    if (!challenge) {
-      throw new Error("Challenge not found");
-    }
-
-    return challenge.exercise;
+    return exercise;
   }
 
   @FieldResolver(() => [ChallengeResponse])
-  async responses(@Root() { id }: Challenge ) {
-    const challenge = await Challenge.createQueryBuilder("challenge")
-      .where("challenge.id = :id", { id })
-      .leftJoinAndSelect("challenge.responses", "responses")
-      .getOne()
+  async responses(@Root() challenge: Challenge ) {
+    const responses = await Challenge.createQueryBuilder("challenge")
+      .relation(Challenge, "responses")
+      .of(challenge)
+      .loadMany();
 
-    if (!challenge) {
-      throw new Error("Challenge not found")
-    }
-
-    return challenge.responses;
+    return responses;
   }
 
+  // TODO: can only create challenge if there isn't an active one
   @Mutation(() => Challenge)
   async createChallenge(@Arg("data") data: CreateChallengeInput, @PubSub() pubsub: PubSubEngine) {
     const exerciseRepository = getRepository(Exercise)
@@ -82,13 +95,16 @@ export class ChallengeResolver {
     const userRepository = getRepository(User);
     // TODO: ensure randos can't create for other users?
     const user = await userRepository.findOne({ where: { id: data.user } });
-    console.log(data)
+
+    const date = new Date();
+    const expiresAt = new Date(date.valueOf() + 30000000) // 300000 5 minutes
 
     const challenge = Challenge.create({
       reps: data.reps,
       exercise,
       user,
-      date: new Date()
+      date: date.toISOString(),
+      expiresAt: expiresAt.toISOString()
     });
 
     await challenge.save();

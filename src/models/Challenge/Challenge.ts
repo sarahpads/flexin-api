@@ -20,6 +20,10 @@ export class Challenge extends BaseEntity {
   @Column()
   date: Date
 
+  @Field(() => Date)
+  @Column()
+  expiresAt: Date
+
   @OneToMany(
     type => ChallengeResponse,
     response => response.challenge

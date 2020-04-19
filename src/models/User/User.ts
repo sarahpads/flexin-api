@@ -1,4 +1,4 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, OneToMany, PrimaryColumn } from "typeorm";
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, OneToMany, PrimaryColumn, JoinTable, JoinColumn } from "typeorm";
 import { ObjectType, Field, ID } from "type-graphql";
 
 import { Challenge } from "../Challenge";
@@ -34,7 +34,11 @@ export class User extends BaseEntity {
 
   @OneToMany(
     type => UserExercise,
-    userExercise => userExercise.user
+    userExercise => userExercise.user,
+    {
+      cascade: true
+    }
   )
+  @JoinColumn()
   exercises: UserExercise[]
 }

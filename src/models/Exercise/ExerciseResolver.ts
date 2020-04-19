@@ -21,15 +21,16 @@ export class ExerciseResolver {
     return exercise;
   }
 
+  // TODO: admin-only
   @Mutation(() => Exercise)
   async createExercise(@Arg("data") data: CreateExerciseInput) {
-    console.log(data)
     const exercise = Exercise.create(data);
     await exercise.save();
 
     return exercise;
   }
 
+  // TODO: admin-only
   @Mutation(() => Exercise)
   async updateExercise(@Arg("id") id: string, @Arg("data") data: CreateExerciseInput) {
     const exercise = await Exercise.findOne({ where: { id } });
