@@ -56,7 +56,7 @@ export class UserResolver {
     user.exercises = data.exercises.map((exercise) => {
       const userExercise = new UserExercise();
       userExercise.user = user;
-      userExercise.exercise = new Exercise()
+      userExercise.exercise = new Exercise();
       userExercise.exercise.id = exercise.exercise;
       userExercise.reps = exercise.reps;
 

@@ -99,14 +99,14 @@ export class ChallengeResolver {
     const user = await userRepository.findOne({ where: { id: data.user } });
 
     const date = new Date();
-    const expiresAt = new Date(date.valueOf() + 30000000) // 300000 5 minutes
+    const expiresAt = new Date(date.valueOf() + 300000) // 300000 5 minutes
 
     const challenge = Challenge.create({
       reps: data.reps,
       exercise,
       user,
-      date: date.toISOString(),
-      expiresAt: expiresAt.toISOString()
+      date: date,
+      expiresAt: expiresAt
     });
 
     await challenge.save();
@@ -114,5 +114,22 @@ export class ChallengeResolver {
     pubsub.publish("NEW_CHALLENGE", challenge);
 
     return challenge;
+  }
+
+  @Authorized([ROLES.ADMIN])
+  @Mutation(() => Boolean)
+  async cancelChallenge() {
+    const now = new Date();
+    const challenge = await Challenge.createQueryBuilder("challenge")
+      .where("challenge.expiresAt > :now", { now })
+      .getOne();
+
+    if (!challenge) {
+      throw new Error("Challenge not found");
+    }
+
+    await challenge.remove();
+
+    return true;
   }
 }

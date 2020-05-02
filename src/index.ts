@@ -65,14 +65,11 @@ async function main() {
 
       const [_, token] = auth.split(' ');
       const user: any = jwtDecode(token);
-      console.log(user)
-      console.log(Date.now(), user.exp * 1000, Date.now() >= user.exp * 1000)
 
       // return if token is expired
       if (Date.now() >= user.exp * 1000) {
         return;
       }
-      console.log("BOOP")
 
       // If not, add user.sub as uid
       // https://developers.google.com/identity/protocols/oauth2/openid-connect#an-id-tokens-payload
