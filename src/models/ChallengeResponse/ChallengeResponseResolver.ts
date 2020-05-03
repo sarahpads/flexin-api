@@ -53,6 +53,7 @@ export class ChallengeResponseResolver {
     return challenge;
   }
 
+  // TODO: need to get userExercise and determine "flex"
   @Authorized([ROLES.SAME_USER])
   @UseMiddleware(CreateResponseValidator)
   @Mutation(() => ChallengeResponse)

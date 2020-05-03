@@ -21,6 +21,11 @@ export class ChallengeResponse extends BaseEntity {
   @Column()
   createdAt: Date;
 
+  // TODO: these aren't nullable, but I'm too lazy to drop the db
+  @Field(() => Number)
+  @Column({ nullable: true })
+  flex: number;
+
   @ManyToOne(
     type => Challenge,
     challenge => challenge.responses,

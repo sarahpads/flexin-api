@@ -88,6 +88,7 @@ export class ChallengeResolver {
     return responses;
   }
 
+  // TODO: need to get userExercise and determine "flex"
   @Authorized([ROLES.SAME_USER])
   @UseMiddleware(CreateChallengeValidator)
   @Mutation(() => Challenge)

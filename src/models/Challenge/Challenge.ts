@@ -24,6 +24,11 @@ export class Challenge extends BaseEntity {
   @Column()
   expiresAt: Date
 
+  // TODO: these aren't nullable, but I'm too lazy to drop the db
+  @Field(() => Number)
+  @Column({ nullable: true })
+  flex: number;
+
   @OneToMany(
     type => ChallengeResponse,
     response => response.challenge
