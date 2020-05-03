@@ -67,7 +67,7 @@ export class ChallengeResponseResolver {
       reps: data.reps,
       challenge,
       user,
-      date: new Date()
+      createdAt: new Date()
     })
 
     await ChallengeResponse.insert(response);

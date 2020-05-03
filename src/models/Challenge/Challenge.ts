@@ -18,7 +18,7 @@ export class Challenge extends BaseEntity {
 
   @Field(() => Date)
   @Column()
-  date: Date
+  createdAt: Date
 
   @Field(() => Date)
   @Column()

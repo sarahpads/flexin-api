@@ -98,15 +98,15 @@ export class ChallengeResolver {
     const userRepository = getRepository(User);
     const user = await userRepository.findOne({ where: { id: data.user } });
 
-    const date = new Date();
-    const expiresAt = new Date(date.valueOf() + 30000000) // 300000 5 minutes
+    const createdAt = new Date();
+    const expiresAt = new Date(createdAt.valueOf() + 30000000) // 300000 5 minutes
 
     const challenge = Challenge.create({
       reps: data.reps,
       exercise,
       user,
-      date: date,
-      expiresAt: expiresAt
+      createdAt,
+      expiresAt
     });
 
     await challenge.save();
@@ -116,6 +116,7 @@ export class ChallengeResolver {
     return challenge;
   }
 
+  // TODO: in order for this to work, we need to delete all responses first
   @Authorized([ROLES.ADMIN])
   @Mutation(() => Boolean)
   async cancelChallenge() {
