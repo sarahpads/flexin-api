@@ -2,7 +2,7 @@ import { Resolver, Query, Mutation, Arg, Authorized } from "type-graphql";
 
 import { Exercise } from "./Exercise";
 import { CreateExerciseInput } from "./CreateExerciseInput";
-import { ROLES } from "../../auth-checker";
+import { Role } from "../Role.enum";
 
 @Resolver()
 export class ExerciseResolver {
@@ -22,7 +22,7 @@ export class ExerciseResolver {
     return exercise;
   }
 
-  @Authorized([ROLES.ADMIN])
+  @Authorized([Role.ADMIN])
   @Mutation(() => Exercise)
   async createExercise(@Arg("data") data: CreateExerciseInput) {
     const exercise = Exercise.create(data);
@@ -31,7 +31,7 @@ export class ExerciseResolver {
     return exercise;
   }
 
-  @Authorized([ROLES.ADMIN])
+  @Authorized([Role.ADMIN])
   @Mutation(() => Exercise)
   async updateExercise(@Arg("id") id: string, @Arg("data") data: CreateExerciseInput) {
     const exercise = await Exercise.findOne({ where: { id } });

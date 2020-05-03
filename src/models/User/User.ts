@@ -5,7 +5,6 @@ import { Challenge } from "../Challenge";
 import { ChallengeResponse } from "../ChallengeResponse";
 import { UserExercise } from "../UserExercise";
 import { Role } from "../Role.enum";
-import { ROLES } from "../../auth-checker";
 
 @Entity()
 @ObjectType()
@@ -22,7 +21,7 @@ export class User extends BaseEntity {
   @Column()
   name: string;
 
-  @Authorized([ROLES.ADMIN])
+  @Authorized([Role.ADMIN])
   @Field(() => Role)
   @Column({ nullable: true })
   role: Role;

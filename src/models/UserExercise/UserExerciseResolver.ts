@@ -5,8 +5,8 @@ import { CreateUserExerciseInput } from "./CreateUserExerciseInput";
 import { getRepository } from "typeorm";
 import { Exercise } from "../Exercise";
 import { User } from "../User/User";
-import { ROLES } from "../../auth-checker";
 import { UpdateUserExercisesInput } from "./UpdateUserExercisesInput";
+import { Role } from "../Role.enum";
 
 @Resolver(of => UserExercise)
 export class UserExerciseResolver {
@@ -49,7 +49,7 @@ export class UserExerciseResolver {
     return exercise;
   }
 
-  @Authorized([ROLES.SAME_USER])
+  @Authorized([Role.USER])
   @Mutation(() => UserExercise)
   async createUserExercise(@Arg("data") data: CreateUserExerciseInput) {
     const exerciseRepository = getRepository(Exercise)
@@ -69,7 +69,7 @@ export class UserExerciseResolver {
     return userExercise;
   }
 
-  @Authorized([ROLES.SAME_USER])
+  @Authorized([Role.USER])
   @Mutation(() => [UserExercise])
   async updateUserExercises(@Arg("data") data: UpdateUserExercisesInput) {
     const userRepository = getRepository(User);

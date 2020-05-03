@@ -3,11 +3,6 @@ import { getConnection } from "typeorm";
 import { User } from "./models/User";
 import { Role } from "./models/Role.enum";
 
-export enum ROLES {
-  ADMIN = "ADMIN",
-  SAME_USER = "SAME_USER"
-}
-
 export const customAuthChecker: AuthChecker<{ uid: string}> = async (
   { root, args, context, info },
   roles
@@ -24,10 +19,10 @@ export const customAuthChecker: AuthChecker<{ uid: string}> = async (
 
 function determineAccess(user: User | undefined, role: string, context: any, args: any) {
   switch(role) {
-    case ROLES.SAME_USER:
+    case Role.USER:
       return context.uid === args.data.user;
 
-    case ROLES.ADMIN:
+    case Role.ADMIN:
       return user && user.role === Role.ADMIN;
 
     default:

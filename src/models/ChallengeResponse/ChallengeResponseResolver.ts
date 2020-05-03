@@ -5,8 +5,8 @@ import { CreateResponseInput } from "./CreateResponseInput";
 import { User } from "../User";
 import { Challenge } from "../Challenge/Challenge";
 import { getRepository } from "typeorm";
-import { ROLES } from "../../auth-checker";
 import { CreateResponseValidator } from "./CreateResponseValidator";
+import { Role } from "../Role.enum";
 
 @Resolver(of => ChallengeResponse)
 export class ChallengeResponseResolver {
@@ -54,7 +54,7 @@ export class ChallengeResponseResolver {
   }
 
   // TODO: need to get userExercise and determine "flex"
-  @Authorized([ROLES.SAME_USER])
+  @Authorized([Role.USER])
   @UseMiddleware(CreateResponseValidator)
   @Mutation(() => ChallengeResponse)
   async createResponse(@Arg("data") data: CreateResponseInput, @PubSub() pubsub: PubSubEngine) {

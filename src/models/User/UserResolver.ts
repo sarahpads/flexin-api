@@ -9,7 +9,6 @@ import { UserExercise } from "../UserExercise";
 import { Exercise } from "../Exercise";
 import { ChallengeResponse } from "../ChallengeResponse";
 import { Role } from "../Role.enum";
-import { ROLES } from "../../auth-checker";
 
 @Resolver(type => User)
 export class UserResolver {
@@ -68,7 +67,7 @@ export class UserResolver {
     return user;
   }
 
-  @Authorized([ROLES.ADMIN])
+  @Authorized([Role.ADMIN])
   @Mutation(() => User)
   async createUser(@Arg("data") data: CreateUserInput) {
     const user = User.create(data);
@@ -77,7 +76,7 @@ export class UserResolver {
     return user;
   }
 
-  @Authorized([ROLES.SAME_USER, ROLES.ADMIN])
+  @Authorized([Role.USER, Role.ADMIN])
   @Mutation(() => User)
   async updateUser(@Arg("id") id: string, @Arg("data") data: UpdateUserInput) {
     const user = await User.findOne({ where: { id } });
@@ -92,7 +91,7 @@ export class UserResolver {
     return user;
   }
 
-  @Authorized([ROLES.ADMIN])
+  @Authorized([Role.ADMIN])
   @Mutation(() => Boolean)
   async deleteUser(@Arg("id") id: string) {
     const user = await User.findOne({ where: { id } });

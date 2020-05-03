@@ -6,8 +6,8 @@ import { getRepository } from "typeorm";
 import { Exercise } from "../Exercise";
 import { User } from "../User";
 import { ChallengeResponse } from "../ChallengeResponse";
-import { ROLES } from "../../auth-checker";
 import { CreateChallengeValidator } from "./CreateChallengeValidator";
+import { Role } from "../Role.enum";
 
 @Resolver(of => Challenge)
 export class ChallengeResolver {
@@ -89,7 +89,7 @@ export class ChallengeResolver {
   }
 
   // TODO: need to get userExercise and determine "flex"
-  @Authorized([ROLES.SAME_USER])
+  @Authorized([Role.USER])
   @UseMiddleware(CreateChallengeValidator)
   @Mutation(() => Challenge)
   async createChallenge(@Arg("data") data: CreateChallengeInput, @PubSub() pubsub: PubSubEngine) {
@@ -118,7 +118,7 @@ export class ChallengeResolver {
   }
 
   // TODO: in order for this to work, we need to delete all responses first
-  @Authorized([ROLES.ADMIN])
+  @Authorized([Role.ADMIN])
   @Mutation(() => Boolean)
   async cancelChallenge() {
     const now = new Date();
