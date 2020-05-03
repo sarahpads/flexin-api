@@ -5,7 +5,8 @@ export enum MuscleGroup {
   SHOULDERS = "shoulders",
   LEGS = "legs",
   CHEST = "chest",
-  ARMS = "arms"
+  ARMS = "arms",
+  ABS = "abs"
 }
 
 registerEnumType(MuscleGroup, {

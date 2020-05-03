@@ -63,13 +63,14 @@ export class ChallengeResponseResolver {
     const userRepository = getRepository(User);
     const user = await userRepository.findOne({ where: { id: data.user } });
 
-    const response = await ChallengeResponse.insert({
+    const response = ChallengeResponse.create({
       reps: data.reps,
       challenge,
       user,
-      date: new Date().toISOString()
-    });
+      date: new Date()
+    })
 
+    await ChallengeResponse.insert(response);
 
     pubsub.publish("NEW_RESPONSE", response);
 

@@ -99,7 +99,7 @@ export class ChallengeResolver {
     const user = await userRepository.findOne({ where: { id: data.user } });
 
     const date = new Date();
-    const expiresAt = new Date(date.valueOf() + 300000) // 300000 5 minutes
+    const expiresAt = new Date(date.valueOf() + 30000000) // 300000 5 minutes
 
     const challenge = Challenge.create({
       reps: data.reps,

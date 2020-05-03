@@ -1,10 +1,12 @@
 import { Resolver, Query, Mutation, Arg, FieldResolver, Root, Ctx, Authorized } from "type-graphql";
+
 import { UserExercise } from "./UserExercise";
 import { CreateUserExerciseInput } from "./CreateUserExerciseInput";
 import { getRepository } from "typeorm";
 import { Exercise } from "../Exercise";
 import { User } from "../User/User";
 import { ROLES } from "../../auth-checker";
+import { UpdateUserExercisesInput } from "./UpdateUserExercisesInput";
 
 @Resolver(of => UserExercise)
 export class UserExerciseResolver {
@@ -56,12 +58,44 @@ export class UserExerciseResolver {
     const userRepository = getRepository(User);
     const user = await userRepository.findOne({ where: { id: data.user } });
 
-    const userExercise = await UserExercise.insert({
+    const userExercise = UserExercise.create({
       reps: data.reps,
       exercise,
       user
-    });
+    })
+
+    await UserExercise.insert(userExercise);
 
     return userExercise;
+  }
+
+  @Authorized([ROLES.SAME_USER])
+  @Mutation(() => [UserExercise])
+  async updateUserExercises(@Arg("data") data: UpdateUserExercisesInput) {
+    const userRepository = getRepository(User);
+    const user = await userRepository.findOne({ where: { id: data.user } });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const userExercises = data.exercises.map((exercise) => {
+      const userExercise = new UserExercise();
+      userExercise.user = user;
+      userExercise.exercise = new Exercise();
+      userExercise.exercise.id = exercise.exercise;
+      userExercise.reps = exercise.reps;
+
+      return userExercise;
+    });
+
+    await UserExercise.createQueryBuilder()
+      .insert()
+      .into(UserExercise)
+      .values(userExercises)
+      .onConflict(`("userId", "exerciseId") DO UPDATE SET "reps" = excluded."reps"`)
+      .execute()
+
+    return userExercises;
   }
 }

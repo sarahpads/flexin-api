@@ -6,8 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon -w src --ext ts --exec ts-node src/index.ts",
-    "postgres": "docker run --name postgres -p 127.0.0.1:6543:5432 -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_DB=flexin -e POSTGRES_USER=postgres postgres",
-    "debug": "node -r ts-node/register --inspect src/index.ts"
+    "postgres": "docker run --name postgres -p 127.0.0.1:6543:5432 -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_DB=flexin -e POSTGRES_USER=postgres postgres"
   },
   "author": "",
   "license": "ISC",
