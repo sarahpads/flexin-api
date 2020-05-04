@@ -18,8 +18,8 @@ export class UserExerciseResolver {
   }
 
   @Query(() => UserExercise)
-  async userExercise(@Arg("id") id: string) {
-    const userExercise = await UserExercise.findOne({ where: { id } });
+  async userExercise(@Arg("exerciseId") exerciseId: string, @Arg("userId") userId: string) {
+    const userExercise = await UserExercise.findOne({ where: { userId, exerciseId }});
 
     if (!userExercise) {
       throw new Error("UserExercise not found");

@@ -53,20 +53,38 @@ export class ChallengeResponseResolver {
     return challenge;
   }
 
-  // TODO: need to get userExercise and determine "flex"
   @Authorized([Role.USER])
   @UseMiddleware(CreateResponseValidator)
   @Mutation(() => ChallengeResponse)
   async createResponse(@Arg("data") data: CreateResponseInput, @PubSub() pubsub: PubSubEngine) {
     const challengeRepository = getRepository(Challenge);
-    const challenge = await challengeRepository.findOne({ where: { id: data.challenge }});
+    const challenge = await challengeRepository.findOne({ where: { id: data.challenge }, relations: ["exercise"]});
+
+    if (!challenge) {
+      throw Error("Challenge not found")
+    }
 
     const userRepository = getRepository(User);
-    const user = await userRepository.findOne({ where: { id: data.user } });
+    const user = await userRepository.findOne({ where: { id: data.user }, relations: ["exercises"] });
+
+    if (!user) {
+      throw Error("User not found");
+    }
+
+    const userExercise = user.exercises.find((userExercise) => {
+      return userExercise.exerciseId === challenge.exercise.id;
+    });
+
+    if (!userExercise) {
+      throw new Error("UserExercise not found");
+    }
+
+    const flex = parseFloat((data.reps / userExercise.reps).toFixed(2));
 
     const response = ChallengeResponse.create({
       reps: data.reps,
       challenge,
+      flex,
       user,
       createdAt: new Date()
     })

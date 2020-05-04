@@ -23,7 +23,7 @@ export class ChallengeResponse extends BaseEntity {
 
   // TODO: these aren't nullable, but I'm too lazy to drop the db
   @Field(() => Number)
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "real" })
   flex: number;
 
   @ManyToOne(

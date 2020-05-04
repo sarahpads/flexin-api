@@ -20,7 +20,7 @@ export const customAuthChecker: AuthChecker<{ uid: string}> = async (
 function determineAccess(user: User | undefined, role: string, context: any, args: any) {
   switch(role) {
     case Role.USER:
-      return context.uid === args.data.user;
+      return context.uid === args.data.user || context.uid === args.userId;
 
     case Role.ADMIN:
       return user && user.role === Role.ADMIN;

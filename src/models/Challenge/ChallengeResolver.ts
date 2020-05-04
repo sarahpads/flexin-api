@@ -88,7 +88,6 @@ export class ChallengeResolver {
     return responses;
   }
 
-  // TODO: need to get userExercise and determine "flex"
   @Authorized([Role.USER])
   @UseMiddleware(CreateChallengeValidator)
   @Mutation(() => Challenge)
@@ -96,8 +95,27 @@ export class ChallengeResolver {
     const exerciseRepository = getRepository(Exercise)
     const exercise = await exerciseRepository.findOne({ where: { id: data.exercise } });
 
+    if (!exercise) {
+      throw Error ("Exercise not found");
+    }
+
     const userRepository = getRepository(User);
-    const user = await userRepository.findOne({ where: { id: data.user } });
+    const user = await userRepository.findOne({ where: { id: data.user }, relations: ["exercises"] });
+
+    if (!user) {
+      throw Error("User not found");
+    }
+
+    const userExercise = user.exercises.find((userExercise) => {
+      return userExercise.exerciseId === exercise.id;
+    });
+
+    if (!userExercise) {
+      throw new Error("UserExercise not found");
+    }
+
+    const flex = parseFloat((data.reps / userExercise.reps).toFixed(2));
+    console.log(typeof flex)
 
     const createdAt = new Date();
     const expiresAt = new Date(createdAt.valueOf() + 30000000) // 300000 5 minutes
@@ -106,6 +124,7 @@ export class ChallengeResolver {
       reps: data.reps,
       exercise,
       user,
+      flex,
       createdAt,
       expiresAt
     });
