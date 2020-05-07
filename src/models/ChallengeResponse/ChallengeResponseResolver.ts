@@ -7,6 +7,7 @@ import { Challenge } from "../Challenge/Challenge";
 import { getRepository } from "typeorm";
 import { CreateResponseValidator } from "./CreateResponseValidator";
 import { Role } from "../Role.enum";
+import NotFoundError from "../../errors/NotFoundError";
 
 @Resolver(of => ChallengeResponse)
 export class ChallengeResponseResolver {
@@ -20,17 +21,6 @@ export class ChallengeResponseResolver {
   @Query(() => [ChallengeResponse])
   challengeResponses() {
     return ChallengeResponse.find();
-  }
-
-  @Query(() => ChallengeResponse)
-  async challengeResponse(@Arg("id") id: string) {
-    const challengeResponse = await ChallengeResponse.findOne({ where: { id } });
-
-    if (!challengeResponse) {
-      throw new Error("ChallengeResponse not found");
-    }
-
-    return challengeResponse;
   }
 
   @FieldResolver(() => User)
@@ -54,21 +44,21 @@ export class ChallengeResponseResolver {
   }
 
   @Authorized([Role.USER])
-  @UseMiddleware(CreateResponseValidator)
+  // @UseMiddleware(CreateResponseValidator)
   @Mutation(() => ChallengeResponse)
   async createResponse(@Arg("data") data: CreateResponseInput, @PubSub() pubsub: PubSubEngine) {
     const challengeRepository = getRepository(Challenge);
     const challenge = await challengeRepository.findOne({ where: { id: data.challenge }, relations: ["exercise"]});
 
     if (!challenge) {
-      throw Error("Challenge not found")
+      throw new NotFoundError(`Challenge ${data.challenge} not found`);
     }
 
     const userRepository = getRepository(User);
     const user = await userRepository.findOne({ where: { id: data.user }, relations: ["exercises"] });
 
     if (!user) {
-      throw Error("User not found");
+      throw new NotFoundError(`User ${data.user} not found`);
     }
 
     const userExercise = user.exercises.find((userExercise) => {
@@ -76,7 +66,7 @@ export class ChallengeResponseResolver {
     });
 
     if (!userExercise) {
-      throw new Error("UserExercise not found");
+      throw new NotFoundError(`UserExercise for challenge ${data.challenge} and user ${data.user} not found`);
     }
 
     const flex = parseFloat((data.reps / userExercise.reps).toFixed(2));

@@ -3,6 +3,7 @@ import { Resolver, Query, Mutation, Arg, Authorized } from "type-graphql";
 import { Exercise } from "./Exercise";
 import { CreateExerciseInput } from "./CreateExerciseInput";
 import { Role } from "../Role.enum";
+import NotFoundError from "../../errors/NotFoundError";
 
 @Resolver()
 export class ExerciseResolver {
@@ -16,7 +17,7 @@ export class ExerciseResolver {
     const exercise = await Exercise.findOne({ where: { id } });
 
     if (!exercise) {
-      throw new Error("Exercise not found");
+      throw new NotFoundError(`Exercise ${id} not found`);
     }
 
     return exercise;
@@ -37,7 +38,7 @@ export class ExerciseResolver {
     const exercise = await Exercise.findOne({ where: { id } });
 
     if (!exercise) {
-      throw new Error("Exercise not found");
+      throw new NotFoundError(`Exercise ${id} not found`);
     }
 
     Object.assign(exercise, data);

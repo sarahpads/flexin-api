@@ -7,6 +7,7 @@ import { Exercise } from "../Exercise";
 import { User } from "../User/User";
 import { UpdateUserExercisesInput } from "./UpdateUserExercisesInput";
 import { Role } from "../Role.enum";
+import NotFoundError from "../../errors/NotFoundError";
 
 @Resolver(of => UserExercise)
 export class UserExerciseResolver {
@@ -22,7 +23,7 @@ export class UserExerciseResolver {
     const userExercise = await UserExercise.findOne({ where: { userId, exerciseId }});
 
     if (!userExercise) {
-      throw new Error("UserExercise not found");
+      throw new NotFoundError(`UserExercise for exercise ${exerciseId} and user ${userId} not found`);
     }
 
     return userExercise;
@@ -76,7 +77,7 @@ export class UserExerciseResolver {
     const user = await userRepository.findOne({ where: { id: data.user } });
 
     if (!user) {
-      throw new Error("User not found");
+      throw new NotFoundError(`User ${data.user} not found`);
     }
 
     const userExercises = data.exercises.map((exercise) => {

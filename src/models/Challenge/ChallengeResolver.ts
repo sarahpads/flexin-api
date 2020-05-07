@@ -8,6 +8,7 @@ import { User } from "../User";
 import { ChallengeResponse } from "../ChallengeResponse";
 import { CreateChallengeValidator } from "./CreateChallengeValidator";
 import { Role } from "../Role.enum";
+import NotFoundError from "../../errors/NotFoundError";
 
 @Resolver(of => Challenge)
 export class ChallengeResolver {
@@ -24,6 +25,17 @@ export class ChallengeResolver {
   }
 
   @Query(() => Challenge)
+  async latestChallenge() {
+    const challenge = Challenge.findOne({ order: { id: "DESC" }});
+
+    if (!challenge) {
+      throw new NotFoundError(`No challenge available`);
+    }
+
+    return challenge;
+  }
+
+  @Query(() => Challenge)
   async activeChallenge() {
     const now = new Date();
     const challenge = await Challenge.createQueryBuilder("challenge")
@@ -31,7 +43,7 @@ export class ChallengeResolver {
       .getOne();
 
     if (!challenge) {
-      throw new Error("Challenge not found");
+      throw new NotFoundError("No active challenge");
     }
 
     return challenge;
@@ -52,7 +64,7 @@ export class ChallengeResolver {
     const challenge = await Challenge.findOne({ where: { id } });
 
     if (!challenge) {
-      throw new Error("Challenge not found");
+      throw new NotFoundError(`Challenge ${id} not found`);
     }
 
     return challenge;
@@ -96,14 +108,14 @@ export class ChallengeResolver {
     const exercise = await exerciseRepository.findOne({ where: { id: data.exercise } });
 
     if (!exercise) {
-      throw Error ("Exercise not found");
+      throw new NotFoundError(`Exercise ${data.exercise} not found`);
     }
 
     const userRepository = getRepository(User);
     const user = await userRepository.findOne({ where: { id: data.user }, relations: ["exercises"] });
 
     if (!user) {
-      throw Error("User not found");
+      throw new NotFoundError(`User ${data.user} not found`);
     }
 
     const userExercise = user.exercises.find((userExercise) => {
@@ -111,14 +123,13 @@ export class ChallengeResolver {
     });
 
     if (!userExercise) {
-      throw new Error("UserExercise not found");
+      throw new NotFoundError(`UserExercise for exercise ${data.exercise} and user ${data.user} not found`);
     }
 
     const flex = parseFloat((data.reps / userExercise.reps).toFixed(2));
-    console.log(typeof flex)
 
     const createdAt = new Date();
-    const expiresAt = new Date(createdAt.valueOf() + 30000000) // 300000 5 minutes
+    const expiresAt = new Date(createdAt.valueOf() + 300000) // 300000 5 minutes
 
     const challenge = Challenge.create({
       reps: data.reps,
@@ -146,7 +157,7 @@ export class ChallengeResolver {
       .getOne();
 
     if (!challenge) {
-      throw new Error("Challenge not found");
+      throw new NotFoundError("No active challenge");
     }
 
     await challenge.remove();
