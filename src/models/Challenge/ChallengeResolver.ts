@@ -126,18 +126,22 @@ export class ChallengeResolver {
       throw new NotFoundError(`UserExercise for exercise ${data.exercise} and user ${data.user} not found`);
     }
 
-    const flex = parseFloat((data.reps / userExercise.reps).toFixed(2));
+    const response = ChallengeResponse.create({
+      user,
+      reps: data.reps,
+      flex: parseFloat((data.reps / userExercise.reps).toFixed(2)),
+      createdAt: new Date()
+    });
 
     const createdAt = new Date();
     const expiresAt = new Date(createdAt.valueOf() + 300000) // 300000 5 minutes
 
     const challenge = Challenge.create({
-      reps: data.reps,
       exercise,
       user,
-      flex,
       createdAt,
-      expiresAt
+      expiresAt,
+      responses: [response]
     });
 
     await challenge.save();

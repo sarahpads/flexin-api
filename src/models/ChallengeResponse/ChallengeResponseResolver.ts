@@ -1,12 +1,11 @@
-import { Resolver, Query, Mutation, Arg, Subscription, FieldResolver, Root, PubSub, PubSubEngine, Authorized, UseMiddleware } from "type-graphql";
+import { Resolver, Query, FieldResolver, Root, Subscription, Arg, Authorized, Mutation, PubSub, PubSubEngine } from "type-graphql";
 
 import { ChallengeResponse } from "./ChallengeResponse";
-import { CreateResponseInput } from "./CreateResponseInput";
 import { User } from "../User";
 import { Challenge } from "../Challenge/Challenge";
-import { getRepository } from "typeorm";
-import { CreateResponseValidator } from "./CreateResponseValidator";
 import { Role } from "../Role.enum";
+import { CreateResponseInput } from "./CreateResponseInput";
+import { getRepository } from "typeorm";
 import NotFoundError from "../../errors/NotFoundError";
 
 @Resolver(of => ChallengeResponse)
@@ -14,7 +13,7 @@ export class ChallengeResponseResolver {
   @Subscription({
     topics: "NEW_RESPONSE"
   })
-  newResponse(@Arg("challengeId") challengeId: string, @Root() response: ChallengeResponse): ChallengeResponse {
+  newResponse(@Root() response: ChallengeResponse): ChallengeResponse {
     return response;
   }
 
