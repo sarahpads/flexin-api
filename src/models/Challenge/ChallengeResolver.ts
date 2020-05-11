@@ -7,8 +7,10 @@ import { Exercise } from "../Exercise";
 import { User } from "../User";
 import { ChallengeResponse } from "../ChallengeResponse";
 import { CreateChallengeValidator } from "./CreateChallengeValidator";
+import { NotificationSubscription } from "../NotificationSubscription";
 import { Role } from "../Role.enum";
 import NotFoundError from "../../errors/NotFoundError";
+import { sendNotification } from "../../services/push-notifications";
 
 @Resolver(of => Challenge)
 export class ChallengeResolver {
@@ -26,7 +28,7 @@ export class ChallengeResolver {
 
   @Query(() => Challenge)
   async latestChallenge() {
-    const challenge = Challenge.findOne({ order: { id: "DESC" }});
+    const challenge = await Challenge.findOne({ order: { id: "DESC" }});
 
     if (!challenge) {
       throw new NotFoundError(`No challenge available`);
@@ -147,6 +149,15 @@ export class ChallengeResolver {
     await challenge.save();
 
     pubsub.publish("NEW_CHALLENGE", challenge);
+
+    const subscriptionRepository = getRepository(NotificationSubscription);
+
+    const subscriptions = await subscriptionRepository.find({ relations: ["user"] });
+    console.log(subscriptions)
+
+    for (let subscription of subscriptions) {
+      sendNotification(challenge, subscription);
+    }
 
     return challenge;
   }
