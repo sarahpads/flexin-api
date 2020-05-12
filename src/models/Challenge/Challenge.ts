@@ -12,10 +12,6 @@ export class Challenge extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: string;
 
-  @Field(() => Number)
-  @Column()
-  reps: number
-
   @Field(() => Date)
   @Column()
   createdAt: Date
@@ -24,14 +20,12 @@ export class Challenge extends BaseEntity {
   @Column()
   expiresAt: Date
 
-  // TODO: these aren't nullable, but I'm too lazy to drop the db
-  @Field(() => Number)
-  @Column({ nullable: true, type: "real" })
-  flex: number;
-
   @OneToMany(
     type => ChallengeResponse,
-    response => response.challenge
+    response => response.challenge,
+    {
+      cascade: true
+    }
   )
   responses: ChallengeResponse[]
 

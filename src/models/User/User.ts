@@ -1,10 +1,11 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, OneToMany, PrimaryColumn, JoinTable, JoinColumn } from "typeorm";
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, OneToMany, PrimaryColumn, JoinTable, JoinColumn, OneToOne } from "typeorm";
 import { ObjectType, Field, ID, Authorized } from "type-graphql";
 
 import { Challenge } from "../Challenge";
 import { ChallengeResponse } from "../ChallengeResponse";
 import { UserExercise } from "../UserExercise";
 import { Role } from "../Role.enum";
+import { NotificationSubscription } from "../NotificationSubscription";
 
 @Entity()
 @ObjectType()
@@ -26,11 +27,18 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   role: Role;
 
+  @Authorized([Role.USER])
+  @OneToOne(
+    type => NotificationSubscription,
+    subscription => subscription.user
+  )
+  subscription: NotificationSubscription;
+
   @OneToMany(
     type => Challenge,
     challenge => challenge.user
   )
-  challenges: Challenge[]
+  challenges: Challenge[];
 
   @OneToMany(
     type => ChallengeResponse,

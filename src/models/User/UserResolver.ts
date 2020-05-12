@@ -28,6 +28,13 @@ export class UserResolver {
     return user;
   }
 
+  @Query(() => Boolean)
+  async hasAccount(@Arg("id") id: string) {
+    const user = await User.findOne({ where: { id } });
+
+    return !!user;
+  }
+
   @FieldResolver(() => [UserExercise])
   async exercises(@Root() user: User) {
     const exercises = await User.createQueryBuilder("user")
@@ -82,7 +89,7 @@ export class UserResolver {
     const user = await User.findOne({ where: { id } });
 
     if (!user) {
-      throw new Error("User not found!");
+      throw new NotFoundError(`User ${id} not found`);
     }
 
     Object.assign(user, data);
@@ -97,7 +104,7 @@ export class UserResolver {
     const user = await User.findOne({ where: { id } });
 
     if (!user) {
-      throw new Error("User not found!");
+      throw new NotFoundError(`User ${id} not found`);
     }
 
     await user.remove();
