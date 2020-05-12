@@ -3,6 +3,7 @@ import { createConnection } from "typeorm";
 import { ApolloServer } from "apollo-server";
 import { buildSchema } from "type-graphql";
 import jwtDecode from "jwt-decode";
+import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 
 import { User, UserResolver } from "./models/User";
 import { Challenge, ChallengeResolver } from "./models/Challenge";
@@ -11,13 +12,38 @@ import { Exercise, ExerciseResolver } from "./models/Exercise";
 import { UserExercise, UserExerciseResolver } from "./models/UserExercise";
 import { customAuthChecker } from "./auth-checker";
 
+const {
+  PSQL_USERNAME,
+  PSQL_PASSWORD,
+  PSQL_DATABASE,
+  PSQL_HOST,
+  PSQL_PORT,
+  PORT
+} = process.env;
+
 async function main() {
+  const secrets = new SecretManagerServiceClient();
+
+  const [usernameSecret, passwordSecret] = await Promise.all([
+    secrets.accessSecretVersion({ name: PSQL_USERNAME }),
+    secrets.accessSecretVersion({ name: PSQL_PASSWORD })
+  ]);
+
+  // @ts-ignore
+  const username = usernameSecret[0].payload.data.toString();
+  // @ts-ignore
+  const password = passwordSecret[0].payload.data.toString();
+
   const connection = await createConnection({
     type: "postgres",
-    host: "localhost",
-    port: 6543,
-    database: "flexin",
-    username: "postgres",
+    database: PSQL_DATABASE,
+    username,
+    password,
+    host: PSQL_HOST,
+    port: parseInt(PSQL_PORT as string),
+    extra: {
+      socketPath: "/cloudsql/flexin:northamerica-northeast1:flexin-postgres"
+    },
     entities: [
       Challenge,
       ChallengeResponse,
@@ -79,7 +105,7 @@ async function main() {
     }
   });
 
-  await server.listen(4000)
+  await server.listen(PORT)
 
   console.log("Server has started!")
 }

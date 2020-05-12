@@ -1,0 +1,35 @@
+runtime: nodejs
+env: flex
+resources:
+  cpu: 1
+  memory_gb: 0.5
+  disk_size_gb: 10
+automatic_scaling:
+  min_num_instances: 1
+  max_num_instances: 20
+  cool_down_period_sec: 60
+  cpu_utilization:
+    target_utilization: 0.80
+
+env_variables:
+  PSQL_DATABASE: "flexin"
+  PSQL_USERNAME: "projects/34199951333/secrets/DB_USERNAME/versions/latest"
+  PSQL_PASSWORD: "projects/34199951333/secrets/DB_PASSWORD/versions/latest"
+  PSQL_HOST: "172.17.0.1"
+  PSQL_PORT: 5432
+
+beta_settings:
+  # The connection name of your instance, available by using
+  # 'gcloud beta sql instances describe [INSTANCE_NAME]' or from
+  # the Instance details page in the Google Cloud Platform Console.
+  cloud_sql_instances: flexin:northamerica-northeast1:flexin-postgres=tcp:5432
+
+skip_files:
+  # settings to keep gcloud from uploading files not required for deployment
+  - ^node_modules$
+  - ^README\..*
+  - ^package-lock.json
+  - \.gitignore
+  - \.es*
+  - ^\.git$
+  - ^errors\.log
