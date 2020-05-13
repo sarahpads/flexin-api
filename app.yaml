@@ -28,7 +28,6 @@ skip_files:
   # settings to keep gcloud from uploading files not required for deployment
   - ^node_modules$
   - ^README\..*
-  - ^package-lock.json
   - \.gitignore
   - \.es*
   - ^\.git$
