@@ -1,5 +1,6 @@
 import "reflect-metadata";
-import { createConnection } from "typeorm";
+import { createConnection, useContainer } from "typeorm";
+import Container from "typedi";
 import { ApolloServer } from "apollo-server";
 import { buildSchema } from "type-graphql";
 import jwtDecode from "jwt-decode";
@@ -35,6 +36,7 @@ async function main() {
   // @ts-ignore
   const password = passwordSecret[0].payload.data.toString();
 
+  useContainer(Container)
   const connection = await createConnection({
     type: "postgres",
     database: PSQL_DATABASE,

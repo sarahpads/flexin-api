@@ -1,4 +1,5 @@
 import { Resolver, Query, Mutation, Arg, Authorized, Subscription, Root, PubSub, PubSubEngine, FieldResolver, UseMiddleware } from "type-graphql";
+import { InjectManager } from "typeorm-typedi-extensions";
 
 import { Challenge } from "./Challenge";
 import { CreateChallengeInput } from "./CreateChallengeInput";
@@ -10,10 +11,12 @@ import { CreateChallengeValidator } from "./CreateChallengeValidator";
 import { NotificationSubscription } from "../NotificationSubscription";
 import { Role } from "../Role.enum";
 import NotFoundError from "../../errors/NotFoundError";
-import { sendNotification } from "../../services/push-notifications";
+import { NotificationService } from "../../services/push-notifications";
 
 @Resolver(of => Challenge)
 export class ChallengeResolver {
+  constructor(@InjectManager() private NotificationService: NotificationService) {}
+
   @Subscription({
     topics: "NEW_CHALLENGE"
   })
@@ -156,7 +159,7 @@ export class ChallengeResolver {
     console.log(subscriptions)
 
     for (let subscription of subscriptions) {
-      sendNotification(challenge, subscription);
+      this.NotificationService.sendNotification(challenge, subscription);
     }
 
     return challenge;
