@@ -3,9 +3,8 @@ import { NotificationSubscription } from "./NotificationSubscription";
 import NotFoundError from "../../errors/NotFoundError";
 import { CreateSubscriptionInput } from "./CreateSubscriptionInput";
 import { Role } from "../Role.enum";
-import { getRepository, PrimaryGeneratedColumn } from "typeorm";
+import { getRepository } from "typeorm";
 import { User } from "../User";
-import { sendNotification } from "../../services/push-notifications";
 
 @Resolver(of => NotificationSubscription)
 export class NotificationSubscriptionResolver {
