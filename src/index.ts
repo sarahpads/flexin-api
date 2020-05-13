@@ -36,7 +36,6 @@ async function main() {
   // @ts-ignore
   const password = passwordSecret[0].payload.data.toString();
 
-  useContainer(Container)
   const connection = await createConnection({
     type: "postgres",
     database: PSQL_DATABASE,
@@ -68,7 +67,8 @@ async function main() {
       UserResolver,
       UserExerciseResolver
     ],
-    authChecker: customAuthChecker
+    authChecker: customAuthChecker,
+    container: Container
   })
 
   const server = new ApolloServer({
@@ -110,9 +110,9 @@ async function main() {
     }
   });
 
-  await server.listen(PORT)
+  const info = await server.listen(PORT || 4000)
 
-  console.log("Server has started!")
+  console.log(`Server has started on port ${info.port}`)
 }
 
 function onConnect(params: any) {

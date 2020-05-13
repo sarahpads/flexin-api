@@ -11,11 +11,11 @@ import { CreateChallengeValidator } from "./CreateChallengeValidator";
 import { NotificationSubscription } from "../NotificationSubscription";
 import { Role } from "../Role.enum";
 import NotFoundError from "../../errors/NotFoundError";
-import { NotificationService } from "../../services/push-notifications";
+import { NotificationService } from "../../services/NotificationService";
 
 @Resolver(of => Challenge)
 export class ChallengeResolver {
-  constructor(@InjectManager() private NotificationService: NotificationService) {}
+  constructor(private NotificationService: NotificationService) {}
 
   @Subscription({
     topics: "NEW_CHALLENGE"
