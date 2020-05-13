@@ -19,7 +19,7 @@
     "jwt-decode": "^2.2.0",
     "pg": "^8.0.2",
     "reflect-metadata": "^0.1.13",
-    "type-graphql": "1.0.0-rc.1",
+    "type-graphql": "^0.17.6",
     "typedi": "^0.8.0",
     "typeorm": "0.2.24",
     "typeorm-typedi-extensions": "^0.2.3",
