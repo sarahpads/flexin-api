@@ -1,20 +1,17 @@
 import { Service } from "typedi";
 import webpush from "web-push";
+import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 
 import { NotificationSubscription } from "../models/NotificationSubscription";
 import { Challenge } from "../models/Challenge";
 
-// webpush.generateVAPIDKeys
-const vapidKeys = {
-  privateKey: "",
-  publicKey: ""
-};
+const {
+  VAPID_PRIVATE_KEY,
+  VAPID_PUBLIC_KEY
+} = process.env;
 
 @Service()
 export class NotificationService {
-  private privateKey: string;
-  private publicKey: string;
-
   constructor() {
     this.init();
   }
@@ -41,11 +38,35 @@ export class NotificationService {
   }
 
   private async init() {
-    console.log('here')
+    const { publicKey, privateKey } = await this.getCreds();
+
     webpush.setVapidDetails(
       "mailto:example@yourdomain.org",
-      vapidKeys.publicKey,
-      vapidKeys.privateKey
+      publicKey as string,
+      privateKey as string
     );
+  }
+
+  private async getCreds() {
+    if (process.env.NODE_ENV !== "production") {
+      return Promise.resolve({
+        publicKey: VAPID_PUBLIC_KEY,
+        privateKey: VAPID_PRIVATE_KEY
+      })
+    }
+
+    const secrets = new SecretManagerServiceClient();
+
+    const [privateSecret, publicSecret] = await Promise.all([
+      secrets.accessSecretVersion({ name: VAPID_PRIVATE_KEY }),
+      secrets.accessSecretVersion({ name: VAPID_PUBLIC_KEY })
+    ]);
+
+    // @ts-ignore
+    const privateKey = privateSecret[0].payload.data.toString();
+    // @ts-ignore
+    const publicKey = publicSecret[0].payload.data.toString();
+
+    return { publicKey, privateKey };
   }
 }
