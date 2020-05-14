@@ -30,5 +30,6 @@ skip_files:
   - ^README\..*
   - \.gitignore
   - \.es*
+  - \.env
   - ^\.git$
   - ^errors\.log

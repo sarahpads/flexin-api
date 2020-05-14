@@ -24,17 +24,7 @@ const {
 } = process.env;
 
 async function main() {
-  const secrets = new SecretManagerServiceClient();
-
-  const [usernameSecret, passwordSecret] = await Promise.all([
-    secrets.accessSecretVersion({ name: PSQL_USERNAME }),
-    secrets.accessSecretVersion({ name: PSQL_PASSWORD })
-  ]);
-
-  // @ts-ignore
-  const username = usernameSecret[0].payload.data.toString();
-  // @ts-ignore
-  const password = passwordSecret[0].payload.data.toString();
+  const { username, password } = await getCreds();
 
   const connection = await createConnection({
     type: "postgres",
@@ -80,8 +70,7 @@ async function main() {
       return error;
     },
     subscriptions: {
-      path: "/subscriptions",
-      onConnect
+      path: "/subscriptions"
     },
     context: async ({ req, connection }) => {
       if (connection) {
@@ -115,8 +104,27 @@ async function main() {
   console.log(`Server has started on port ${info.port}`)
 }
 
-function onConnect(params: any) {
-  console.log('connect', params)
+async function getCreds(): Promise<any> {
+  if (process.env.NODE_ENV !== "production") {
+    return Promise.resolve({
+      username: PSQL_USERNAME
+    })
+  }
+
+  console.log(process.env)
+  const secrets = new SecretManagerServiceClient();
+
+  const [usernameSecret, passwordSecret] = await Promise.all([
+    secrets.accessSecretVersion({ name: PSQL_USERNAME }),
+    secrets.accessSecretVersion({ name: PSQL_PASSWORD })
+  ]);
+
+  // @ts-ignore
+  const username = usernameSecret[0].payload.data.toString();
+  // @ts-ignore
+  const password = passwordSecret[0].payload.data.toString();
+
+  return { username, password };
 }
 
 main();
