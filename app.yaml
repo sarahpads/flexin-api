@@ -31,5 +31,6 @@ skip_files:
   - ^package-lock.json
   - \.gitignore
   - \.es*
+  - \.env
   - ^\.git$
   - ^errors\.log
