@@ -48,7 +48,7 @@ export class UserResolver {
   @FieldResolver(() => [ChallengeResponse])
   async responses(@Root() user: User) {
     const responses = await User.createQueryBuilder("user")
-      .relation(User, "responses")
+      .relation(User, "challengeResponses")
       .of(user)
       .loadMany();
 
