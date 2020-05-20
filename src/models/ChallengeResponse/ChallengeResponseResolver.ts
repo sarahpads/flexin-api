@@ -1,4 +1,4 @@
-import { Resolver, Query, FieldResolver, Root, Subscription, Arg, Authorized, Mutation, PubSub, PubSubEngine } from "type-graphql";
+import { Resolver, Query, FieldResolver, Root, Subscription, Arg, Authorized, Mutation, PubSub, PubSubEngine, UseMiddleware } from "type-graphql";
 
 import { ChallengeResponse } from "./ChallengeResponse";
 import { User } from "../User";
@@ -7,6 +7,7 @@ import { Role } from "../Role.enum";
 import { CreateResponseInput } from "./CreateResponseInput";
 import { getRepository } from "typeorm";
 import NotFoundError from "../../errors/NotFoundError";
+import { CreateResponseValidator } from "./CreateResponseValidator";
 
 @Resolver(of => ChallengeResponse)
 export class ChallengeResponseResolver {
@@ -24,6 +25,10 @@ export class ChallengeResponseResolver {
 
   @FieldResolver(() => User)
   async user(@Root() challengeResponse: ChallengeResponse) {
+    if (!!challengeResponse.user) {
+      return challengeResponse.user;
+    }
+
     const user = await ChallengeResponse.createQueryBuilder()
       .relation(ChallengeResponse, "user")
       .of(challengeResponse)
@@ -34,6 +39,10 @@ export class ChallengeResponseResolver {
 
   @FieldResolver(() => Challenge)
   async challenge(@Root() challengeResponse: ChallengeResponse) {
+    if (!!challengeResponse.challenge) {
+      return challengeResponse.challenge;
+    }
+
     const challenge = await ChallengeResponse.createQueryBuilder()
       .relation(ChallengeResponse, "challenge")
       .of(challengeResponse)
@@ -43,7 +52,7 @@ export class ChallengeResponseResolver {
   }
 
   @Authorized([Role.USER])
-  // @UseMiddleware(CreateResponseValidator)
+  @UseMiddleware(CreateResponseValidator)
   @Mutation(() => ChallengeResponse)
   async createResponse(@Arg("data") data: CreateResponseInput, @PubSub() pubsub: PubSubEngine) {
     const challengeRepository = getRepository(Challenge);

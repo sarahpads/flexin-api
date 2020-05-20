@@ -54,14 +54,12 @@ export class ChallengeResolver {
     return challenge;
   }
 
-  @Query(() => [ChallengeResponse])
-  async challengeResponses(@Arg("challengeId") id: string) {
-    const responses = await Challenge.createQueryBuilder("challenge")
-      .relation(Challenge, "responses")
-      .of({ id })
-      .loadMany();
-
-    return responses;
+  @Query(() => [Challenge])
+  leaderboard() {
+    return Challenge.createQueryBuilder("challenge")
+      .leftJoinAndSelect("challenge.responses", "responses")
+      .leftJoinAndSelect("responses.user", "user")
+      .getMany();
   }
 
   @Query(() => Challenge)
@@ -77,6 +75,10 @@ export class ChallengeResolver {
 
   @FieldResolver(() => User)
   async user(@Root() challenge: Challenge) {
+    if (!!challenge.user) {
+      return challenge.user;
+    }
+
     const user = await Challenge.createQueryBuilder("challenge")
       .relation(Challenge, "user")
       .of(challenge)
@@ -87,6 +89,10 @@ export class ChallengeResolver {
 
   @FieldResolver(() => Exercise)
   async exercise(@Root() challenge: Challenge) {
+    if (!!challenge.exercise) {
+      return challenge.exercise;
+    }
+
     const exercise = await Challenge.createQueryBuilder("challenge")
       .relation(Challenge, "exercise")
       .of(challenge)
@@ -97,6 +103,10 @@ export class ChallengeResolver {
 
   @FieldResolver(() => [ChallengeResponse])
   async responses(@Root() challenge: Challenge) {
+    if (!!challenge.responses) {
+      return challenge.responses;
+    }
+
     const responses = await Challenge.createQueryBuilder("challenge")
       .relation(Challenge, "responses")
       .of(challenge)
