@@ -12,10 +12,16 @@ import { NotificationSubscription } from "../NotificationSubscription";
 import { Role } from "../Role.enum";
 import NotFoundError from "../../errors/NotFoundError";
 import { NotificationService } from "../../services/NotificationService";
+import { CreateResponseValidator } from "../ChallengeResponse/CreateResponseValidator";
+import { CreateResponseInput } from "../ChallengeResponse/CreateResponseInput";
+import { RankingService } from "../../services/RankingService";
 
 @Resolver(of => Challenge)
 export class ChallengeResolver {
-  constructor(private NotificationService: NotificationService) {}
+  constructor(
+    private NotificationService: NotificationService,
+    private RankingService: RankingService
+  ) {}
 
   @Subscription({
     topics: "NEW_CHALLENGE"
@@ -23,6 +29,18 @@ export class ChallengeResolver {
   newChallenge(@Root() challenge: Challenge): Challenge {
     return challenge;
   }
+
+  @Subscription({
+    topics: "NEW_RESPONSE"
+  })
+  updatedChallenge(@Root() challenge: Challenge): Challenge {
+    // TODO: this may be better suited with the challenge stuff
+    // maybe move some of the overlap to a service?
+    // kick off process to re-evaluate
+    // use an async queue to make sure only one is processed at a time
+    return challenge;
+  }
+
 
   @Query(() => [Challenge])
   challenges() {
@@ -149,7 +167,7 @@ export class ChallengeResolver {
     });
 
     const createdAt = new Date();
-    const expiresAt = new Date(createdAt.valueOf() + 300000) // 300000 5 minutes
+    const expiresAt = new Date(createdAt.valueOf() + 30000000) // 300000 5 minutes
 
     const challenge = Challenge.create({
       exercise,
@@ -166,13 +184,57 @@ export class ChallengeResolver {
     const subscriptionRepository = getRepository(NotificationSubscription);
 
     const subscriptions = await subscriptionRepository.find({ relations: ["user"] });
-    console.log(subscriptions)
 
     for (let subscription of subscriptions) {
       this.NotificationService.sendNotification(challenge, subscription);
     }
 
     return challenge;
+  }
+
+  @Authorized([Role.USER])
+  @UseMiddleware(CreateResponseValidator)
+  @Mutation(() => ChallengeResponse)
+  async createResponse(@Arg("data") data: CreateResponseInput, @PubSub() pubsub: PubSubEngine) {
+    const challengeRepository = getRepository(Challenge);
+    const challenge = await challengeRepository.findOne({ where: { id: data.challenge }, relations: ["exercise"]});
+
+    if (!challenge) {
+      throw new NotFoundError(`Challenge ${data.challenge} not found`);
+    }
+
+    const userRepository = getRepository(User);
+    const user = await userRepository.findOne({ where: { id: data.user }, relations: ["exercises"] });
+
+    if (!user) {
+      throw new NotFoundError(`User ${data.user} not found`);
+    }
+
+    const userExercise = user.exercises.find((userExercise) => {
+      return userExercise.exerciseId === challenge.exercise.id;
+    });
+
+    if (!userExercise) {
+      throw new NotFoundError(`UserExercise for challenge ${data.challenge} and user ${data.user} not found`);
+    }
+
+    const flex = parseFloat((data.reps / userExercise.reps).toFixed(2));
+
+    const response = ChallengeResponse.create({
+      reps: data.reps,
+      challenge,
+      flex,
+      user,
+      createdAt: new Date()
+    })
+
+    await ChallengeResponse.insert(response);
+
+    challenge.responses = await this.RankingService.rank(response.challengeId);
+
+    pubsub.publish("NEW_RESPONSE", challenge);
+
+    return response;
   }
 
   // TODO: in order for this to work, we need to delete all responses first

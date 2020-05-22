@@ -17,6 +17,7 @@
     "apollo-server": "^2.12.0",
     "crypto": "^1.0.1",
     "jwt-decode": "^2.2.0",
+    "p-queue": "^6.4.0",
     "pg": "^8.0.2",
     "reflect-metadata": "^0.1.13",
     "type-graphql": "^0.17.6",

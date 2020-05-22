@@ -26,6 +26,14 @@ export class ChallengeResponse extends BaseEntity {
   @Column({ nullable: true, type: "real" })
   flex: number;
 
+  @Field(() => Number)
+  @Column({ nullable: true, type: "real" })
+  rank: number;
+
+  @Field(() => Number)
+  @Column({ nullable: true, type: "real"})
+  gains: number;
+
   @ManyToOne(
     type => Challenge,
     challenge => challenge.responses,

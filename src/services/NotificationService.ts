@@ -31,7 +31,6 @@ export class NotificationService {
           body: `You have 5 minutes to respond.`
         })
       )
-      .then((response) => console.log(response))
       .catch(err => {
         console.log(err);
       });

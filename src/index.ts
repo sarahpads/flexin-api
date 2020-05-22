@@ -111,7 +111,6 @@ async function getCreds(): Promise<any> {
     })
   }
 
-  console.log(process.env)
   const secrets = new SecretManagerServiceClient();
 
   const [usernameSecret, passwordSecret] = await Promise.all([
