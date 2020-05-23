@@ -8,9 +8,11 @@ import { User } from "../User";
 @ObjectType()
 export class ChallengeResponse extends BaseEntity {
   @PrimaryColumn()
+  @Field()
   challengeId: string;
 
   @PrimaryColumn()
+  @Field()
   userId: string;
 
   @Field(() => Number)

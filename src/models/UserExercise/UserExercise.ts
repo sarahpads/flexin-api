@@ -8,9 +8,11 @@ import { Exercise } from "../Exercise";
 @ObjectType()
 export class UserExercise extends BaseEntity {
   @PrimaryColumn()
+  @Field()
   userId: string;
 
   @PrimaryColumn()
+  @Field()
   exerciseId: string;
 
   @Field()
