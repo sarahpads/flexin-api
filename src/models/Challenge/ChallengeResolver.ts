@@ -75,6 +75,8 @@ export class ChallengeResolver {
   @Query(() => [Challenge])
   leaderboard() {
     return Challenge.createQueryBuilder("challenge")
+      .leftJoinAndSelect("challenge.exercise", "exercise")
+      .leftJoinAndSelect("challenge.user", "author")
       .leftJoinAndSelect("challenge.responses", "responses")
       .leftJoinAndSelect("responses.user", "user")
       .getMany();
