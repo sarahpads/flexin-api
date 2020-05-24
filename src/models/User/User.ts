@@ -28,7 +28,7 @@ export class User extends BaseEntity {
 
   @Authorized([Role.USER])
   @Field(() => String)
-  @Column()
+  @Column({ nullable: true })
   subscription: string;
 
   @OneToMany(

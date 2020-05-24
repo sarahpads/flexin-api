@@ -163,6 +163,8 @@ export class ChallengeResolver {
     const response = ChallengeResponse.create({
       user,
       reps: data.reps,
+      rank: 1,
+      gains: 0,
       flex: parseFloat((data.reps / userExercise.reps).toFixed(2)),
       createdAt: new Date()
     });
@@ -184,8 +186,8 @@ export class ChallengeResolver {
 
     const users = await User.createQueryBuilder("user")
       .select(["user.subscription"])
-      .where({ id: Not(data.user)})
-      .where("user.subscription IS NOT NULL")
+      .where({ id: Not(data.user) })
+      .andWhere("user.subscription IS NOT NULL")
       .getMany();
 
     for (let user of users) {
