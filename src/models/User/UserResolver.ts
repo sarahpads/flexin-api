@@ -9,6 +9,7 @@ import { UserExercise } from "../UserExercise";
 import { Exercise } from "../Exercise";
 import { ChallengeResponse } from "../ChallengeResponse";
 import { Role } from "../Role.enum";
+import { CreateSubscriptionInput } from "./CreateSubscriptionInput";
 
 @Resolver(type => User)
 export class UserResolver {
@@ -53,6 +54,21 @@ export class UserResolver {
       .loadMany();
 
     return responses;
+  }
+
+  @Mutation(() => Boolean)
+  async subscribe(@Arg("data") data: CreateSubscriptionInput) {
+    const user = await User.findOne({ id: data.user })
+
+    if (!user) {
+      throw new NotFoundError(`User ${data.user} not found`);
+    }
+
+    user.subscription = data.notification;
+
+    await user.save();
+
+    return true;
   }
 
   @Mutation(() => User)

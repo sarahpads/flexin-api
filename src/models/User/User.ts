@@ -5,7 +5,6 @@ import { Challenge } from "../Challenge";
 import { ChallengeResponse } from "../ChallengeResponse";
 import { UserExercise } from "../UserExercise";
 import { Role } from "../Role.enum";
-import { NotificationSubscription } from "../NotificationSubscription";
 
 @Entity()
 @ObjectType()
@@ -28,11 +27,9 @@ export class User extends BaseEntity {
   role: Role;
 
   @Authorized([Role.USER])
-  @OneToOne(
-    type => NotificationSubscription,
-    subscription => subscription.user
-  )
-  subscription: NotificationSubscription;
+  @Field(() => String)
+  @Column()
+  subscription: string;
 
   @OneToMany(
     type => Challenge,

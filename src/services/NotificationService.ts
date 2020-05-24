@@ -2,7 +2,6 @@ import { Service } from "typedi";
 import webpush from "web-push";
 import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 
-import { NotificationSubscription } from "../models/NotificationSubscription";
 import { Challenge } from "../models/Challenge";
 
 const {
@@ -16,21 +15,16 @@ export class NotificationService {
     this.init();
   }
 
-  public sendNotification(challenge: Challenge, subscription: NotificationSubscription) {
-    // we don't want to send a notification to the person who
-    // created the challenge
-    if (subscription.user.id === challenge.user.id) {
-      return;
-    }
-
+  public sendNotification(challenge: Challenge, subscription: string) {
     webpush
       .sendNotification(
-        JSON.parse(subscription.notification),
+        JSON.parse(subscription),
         JSON.stringify({
           title: `${challenge.user.name} has challenged you to ${challenge.exercise.title}s!`,
           body: `You have 5 minutes to respond.`
         })
       )
+      .then((response) => console.log(response))
       .catch(err => {
         console.log(err);
       });

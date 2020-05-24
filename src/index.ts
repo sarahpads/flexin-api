@@ -11,7 +11,6 @@ import { Challenge, ChallengeResolver } from "./models/Challenge";
 import { ChallengeResponse, ChallengeResponseResolver } from "./models/ChallengeResponse";
 import { Exercise, ExerciseResolver } from "./models/Exercise";
 import { UserExercise, UserExerciseResolver } from "./models/UserExercise";
-import { NotificationSubscription, NotificationSubscriptionResolver } from "./models/NotificationSubscription";
 import { customAuthChecker } from "./auth-checker";
 
 const {
@@ -40,7 +39,6 @@ async function main() {
       Challenge,
       ChallengeResponse,
       Exercise,
-      NotificationSubscription,
       User,
       UserExercise
     ],
@@ -53,7 +51,6 @@ async function main() {
       ChallengeResolver,
       ChallengeResponseResolver,
       ExerciseResolver,
-      NotificationSubscriptionResolver,
       UserResolver,
       UserExerciseResolver
     ],

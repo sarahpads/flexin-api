@@ -3,12 +3,11 @@ import { InjectManager } from "typeorm-typedi-extensions";
 
 import { Challenge } from "./Challenge";
 import { CreateChallengeInput } from "./CreateChallengeInput";
-import { getRepository } from "typeorm";
+import { getRepository, Not } from "typeorm";
 import { Exercise } from "../Exercise";
 import { User } from "../User";
 import { ChallengeResponse } from "../ChallengeResponse";
 import { CreateChallengeValidator } from "./CreateChallengeValidator";
-import { NotificationSubscription } from "../NotificationSubscription";
 import { Role } from "../Role.enum";
 import NotFoundError from "../../errors/NotFoundError";
 import { NotificationService } from "../../services/NotificationService";
@@ -169,7 +168,7 @@ export class ChallengeResolver {
     });
 
     const createdAt = new Date();
-    const expiresAt = new Date(createdAt.valueOf() + 30000000) // 300000 5 minutes
+    const expiresAt = new Date(createdAt.valueOf() + 3000000) // 300000 5 minutes
 
     const challenge = Challenge.create({
       exercise,
@@ -183,12 +182,14 @@ export class ChallengeResolver {
 
     pubsub.publish("NEW_CHALLENGE", challenge);
 
-    const subscriptionRepository = getRepository(NotificationSubscription);
+    const users = await User.createQueryBuilder("user")
+      .select(["user.subscription"])
+      .where({ id: Not(data.user)})
+      .where("user.subscription IS NOT NULL")
+      .getMany();
 
-    const subscriptions = await subscriptionRepository.find({ relations: ["user"] });
-
-    for (let subscription of subscriptions) {
-      this.NotificationService.sendNotification(challenge, subscription);
+    for (let user of users) {
+      this.NotificationService.sendNotification(challenge, user.subscription);
     }
 
     return challenge;
