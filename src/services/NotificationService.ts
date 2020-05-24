@@ -32,7 +32,6 @@ export class NotificationService {
 
   private async init() {
     const { publicKey, secretKey } = await this.getCreds();
-    console.log('setting vapid details', publicKey)
 
     webpush.setVapidDetails(
       "https://flexin.nn.r.appspot.com/",

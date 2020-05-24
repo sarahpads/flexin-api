@@ -33,10 +33,6 @@ export class ChallengeResolver {
     topics: "NEW_RESPONSE"
   })
   updatedChallenge(@Root() challenge: Challenge): Challenge {
-    // TODO: this may be better suited with the challenge stuff
-    // maybe move some of the overlap to a service?
-    // kick off process to re-evaluate
-    // use an async queue to make sure only one is processed at a time
     return challenge;
   }
 
@@ -169,8 +165,11 @@ export class ChallengeResolver {
       createdAt: new Date()
     });
 
+    const duration = process.env.CHALLENGE_DURATION
+      ? parseInt(process.env.CHALLENGE_DURATION)
+      : 3000000;
     const createdAt = new Date();
-    const expiresAt = new Date(createdAt.valueOf() + 3000000) // 300000 5 minutes
+    const expiresAt = new Date(createdAt.valueOf() + duration) // 300000 5 minutes
 
     const challenge = Challenge.create({
       exercise,
