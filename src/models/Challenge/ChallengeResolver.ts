@@ -72,8 +72,12 @@ export class ChallengeResolver {
     return Challenge.createQueryBuilder("challenge")
       .leftJoinAndSelect("challenge.exercise", "exercise")
       .leftJoinAndSelect("challenge.user", "author")
-      .leftJoinAndSelect("challenge.responses", "responses")
-      .leftJoinAndSelect("responses.user", "user")
+      .leftJoinAndSelect("challenge.responses", "response")
+      .leftJoinAndSelect("response.user", "user")
+      .orderBy({
+        "challenge.createdAt": "DESC",
+        "response.rank": "ASC",
+      })
       .getMany();
   }
 
