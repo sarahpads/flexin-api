@@ -5,7 +5,7 @@ import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 import { Challenge } from "../models/Challenge";
 
 const {
-  VAPID_PRIVATE_KEY,
+  VAPID_SECRET_KEY,
   VAPID_PUBLIC_KEY
 } = process.env;
 
@@ -31,12 +31,13 @@ export class NotificationService {
   }
 
   private async init() {
-    const { publicKey, privateKey } = await this.getCreds();
+    const { publicKey, secretKey } = await this.getCreds();
+    console.log('setting vapid details', publicKey)
 
     webpush.setVapidDetails(
-      "mailto:example@yourdomain.org",
+      "https://flexin.nn.r.appspot.com/",
       publicKey as string,
-      privateKey as string
+      secretKey as string
     );
   }
 
@@ -44,22 +45,23 @@ export class NotificationService {
     if (process.env.NODE_ENV !== "production") {
       return Promise.resolve({
         publicKey: VAPID_PUBLIC_KEY,
-        privateKey: VAPID_PRIVATE_KEY
+        secretKey: VAPID_SECRET_KEY
       })
     }
 
     const secrets = new SecretManagerServiceClient();
 
-    const [privateSecret, publicSecret] = await Promise.all([
-      secrets.accessSecretVersion({ name: VAPID_PRIVATE_KEY }),
+    console.log("env vars", VAPID_SECRET_KEY, VAPID_PUBLIC_KEY)
+    const [secretSecret, publicSecret] = await Promise.all([
+      secrets.accessSecretVersion({ name: VAPID_SECRET_KEY }),
       secrets.accessSecretVersion({ name: VAPID_PUBLIC_KEY })
     ]);
 
     // @ts-ignore
-    const privateKey = privateSecret[0].payload.data.toString();
+    const secretKey = secretSecret[0].payload.data.toString();
     // @ts-ignore
     const publicKey = publicSecret[0].payload.data.toString();
 
-    return { publicKey, privateKey };
+    return { publicKey, secretKey };
   }
 }
