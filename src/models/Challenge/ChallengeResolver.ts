@@ -171,7 +171,7 @@ export class ChallengeResolver {
 
     const duration = process.env.CHALLENGE_DURATION
       ? parseInt(process.env.CHALLENGE_DURATION)
-      : 3000000;
+      : 300000;
     const createdAt = new Date();
     const expiresAt = new Date(createdAt.valueOf() + duration) // 300000 5 minutes
 
