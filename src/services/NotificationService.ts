@@ -16,13 +16,21 @@ export class NotificationService {
   }
 
   public sendNotification(challenge: Challenge, subscription: string) {
+    const duration = process.env.CHALLENGE_DURATION
+      ? parseInt(process.env.CHALLENGE_DURATION)
+      : 300000;
+    const TTL = duration / 1000;
+
     webpush
       .sendNotification(
         JSON.parse(subscription),
         JSON.stringify({
           title: `${challenge.user.name} has challenged you to ${challenge.exercise.title}s!`,
           body: `You have 5 minutes to respond.`
-        })
+        }),
+        {
+          TTL
+        }
       )
       .then((response) => console.log(response))
       .catch(err => {
